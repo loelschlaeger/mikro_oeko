@@ -1,0 +1,23 @@
+---
+title: "Ex 01"
+author: "Lennart Oelschläger"
+date: "`r Sys.Date()`"
+course: "Einf. Oeko"
+term: "WS 2023"
+output: 
+  pdf_document:
+    template: template.tex
+    highlight: null
+solution: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  include = rmarkdown::metadata$solution, comment = '#', prompt = TRUE
+)
+```
+
+## Thema
+
+## Aufgabe
+
