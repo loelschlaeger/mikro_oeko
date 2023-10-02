@@ -376,6 +376,16 @@
       ],
       "Hash": "d0ef2856b83dc33ea6e255caf6229ee2"
     },
+    "wooldridge": {
+      "Package": "wooldridge",
+      "Version": "1.4-3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R"
+      ],
+      "Hash": "401576d1fd5729be57e9a1077fce25a5"
+    },
     "xfun": {
       "Package": "xfun",
       "Version": "0.40",
