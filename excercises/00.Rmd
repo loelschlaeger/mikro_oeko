@@ -1,0 +1,40 @@
+---
+title: "Aufgabenblatt 0"
+author: "Lennart Oelschläger"
+email: "lennart.oelschlaeger@uni-bielefeld.de"
+date: "`r format(Sys.Date(), format = '%d.%m.%Y')`"
+course: "310214 Praktische Übung zu \"Einführung in die Mikroökonometrie\""
+term: "Wintersemester 2023/2024"
+output: 
+  pdf_document:
+    template: template.tex
+    highlight: null
+solution: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  include = rmarkdown::metadata$solution, comment = '#', prompt = TRUE
+)
+```
+
+## Organisation
+
+Die Praktische Übung zu "Einführung in die Mikroökonometrie" findet zweiwöchentlich statt. Die Termine und Räume [finden Sie im eKVV](https://ekvv.uni-bielefeld.de/kvv_publ/publ/Veranstaltung_Termine.jsp?id=426056365). Ich lade vor den Treffen das aktuelle Aufgabenblatt in [Moodle](im Moodle der Veranstaltung (https://moodle.uni-bielefeld.de/course/view.php?id=2681)) hoch. Während der Treffen haben Sie Zeit an den Aufgaben zu arbeiten, im Anschluss besprechen wir die Lösungen gemeinsam.
+
+Sie können eine Studienleistung für 31-M23 oder 31-SW-StatM erwerben. Dazu analysieren Sie einen von mir bereitgestellten Datensatz mit den Methoden aus der Vorlesung. 
+
+- Wenn Sie eine Studienleistung erwerben möchten, müssen Sie mir das bis zum 10.11.2023 durch [eine Nachricht im Forum](https://moodle.uni-bielefeld.de/mod/forum/discuss.php?d=7437) mitteilen.
+- Zum 20.11.2023 erhalten Sie dann einen Datensatz mit Fragestellungen von mir. Die Fragestellungen umfassen eine Beschreibung der Daten, eine Formulierung geeigneter Methoden zur Analyse der Daten und ein konkretes Modellierungsziel.
+- Ihre Bearbeitung der Fragestellungen ist in zwei Teile aufgeteilt, die Sie jeweils im Moodle als einzelne .pdf Datei hochladen.
+   1. Bis zum 22.12.2023 geben Sie Ihre Beschreibung der Daten ab.
+   2. Bis zum 12.01.2024 geben Sie Ihre Formulierung der Methoden und Modellierung ab.
+- Am 29.01.2024 gibt es eine kleine Abschlussdiskussion der Abgaben. 
+
+## Aufgaben
+
+Die folgenden Aufgaben sind eine Wiederholung einiger Konzepte aus Mathematik, Wahrscheinlichkeitstheorie und Statistik, die in der Vorlesung eingesetzt werden. Außerdem wiederholen wir das Programmieren in R.
+
+1. Erste Aufgabe
+
+\comment{Bla bla}
