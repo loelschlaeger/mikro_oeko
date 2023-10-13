@@ -9,7 +9,7 @@ output:
   pdf_document:
     template: template.tex
     highlight: null
-solution: true
+solution: false
 ---
 
 ```{r setup, include=FALSE}
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 ## Organisation
 
-Die Praktische Übung zu "Einführung in die Mikroökonometrie" findet zweiwöchentlich statt. Die Termine und Räume [finden Sie im eKVV](https://ekvv.uni-bielefeld.de/kvv_publ/publ/Veranstaltung_Termine.jsp?id=426056365). Ich lade vor den Treffen das aktuelle Aufgabenblatt in [Moodle](im Moodle der Veranstaltung (https://moodle.uni-bielefeld.de/course/view.php?id=2681)) hoch. Während der Treffen haben Sie Zeit an den Aufgaben zu arbeiten, im Anschluss besprechen wir die Lösungen gemeinsam.
+Die Praktische Übung zu "Einführung in die Mikroökonometrie" findet zweiwöchentlich statt. Die Termine und Räume [finden Sie im eKVV](https://ekvv.uni-bielefeld.de/kvv_publ/publ/Veranstaltung_Termine.jsp?id=426056365). Ich lade vor den Treffen das aktuelle Aufgabenblatt in [Moodle](im Moodle der Veranstaltung (https://moodle.uni-bielefeld.de/course/view.php?id=2681)) hoch. Während der Treffen haben Sie Zeit an den Aufgaben zu arbeiten, im Anschluss besteht die Möglichkeit die Lösungen gemeinsam zu besprechen.
 
 Sie können eine Studienleistung für 31-M23 oder 31-SW-StatM erwerben. Dazu analysieren Sie einen von mir bereitgestellten Datensatz mit den Methoden aus der Vorlesung. 
 
@@ -33,8 +33,215 @@ Sie können eine Studienleistung für 31-M23 oder 31-SW-StatM erwerben. Dazu ana
 
 ## Aufgaben
 
-Die folgenden Aufgaben sind eine Wiederholung einiger Konzepte aus Mathematik, Wahrscheinlichkeitstheorie und Statistik, die in der Vorlesung eingesetzt werden. Außerdem wiederholen wir das Programmieren in R.
+Die folgenden Aufgaben sind eine Wiederholung einiger Konzepte aus Mathematik, Wahrscheinlichkeitstheorie und Statistik, die in der Vorlesung eingesetzt werden. Außerdem wiederholen wir das Programmieren in \texttt{R} und das Erstellen von Berichten in \texttt{R Markdown}.
 
-1. Erste Aufgabe
+1. Die Dokumentation \emph{simpleR} von John Verzani liefert eine gute Einführung in \texttt{R}, Sie finden das Dokument unter \href{http://cran.r-project.org/doc/contrib/Verzani-SimpleR.pdf}{http://cran.r-project.org/doc/contrib/Verzani-SimpleR.pdf}. Lesen Sie \emph{Section 2: Data}, um zu lernen, wie Datensätze mit der \texttt{c()} Funktion eingegeben werden können. Erzeugen Sie anschließend folgende zwei Vektoren in \texttt{R}:
+\setcounter{MaxMatrixCols}{11}
+\begin{align*}
+x^\top &=
+\begin{bmatrix}
+10 & 8 & 13 & 9 & 11 & 14 & 6 & 4 & 12 & 7 & 5
+\end{bmatrix}
+\\
+y^\top &=
+\begin{bmatrix}
+8.1 & 6.9 & 7.5 & 8.8 & 8.3 & 9.9 & 7.2 & 4.2 & 10.8 & 4.8 & 5.6
+\end{bmatrix}
+\end{align*}
 
-\comment{Bla bla}
+```{r, Aufgabe 1}
+x <- c(10, 8, 13, 9, 11, 14, 6, 4, 12, 7, 5)
+y <- c(8.1, 6.9, 7.5, 8.8, 8.3, 9.9, 7.2, 4.2, 10.8, 4.8, 5.6)
+```
+
+2. Welche Operation wird durch \texttt{x + y} ausgeführt? Wenden Sie auch \texttt{-, *, /, \%*\%} an.
+
+```{r, Aufgabe 2}
+x + y
+x - y
+x * y
+x / y
+x %*% y
+t(x) %*% y
+# x %*% t(y) 
+# t(x) %*% t(y)
+```
+
+\comment{
+\texttt{x + y} ist die elementweise Addition. Analog sind \texttt{-, *, /} die elementweise Subtraktion, Multiplikation und Division. \texttt{x \%*\% y} ist das Matrikprodukt $x^\top y$.
+}
+
+3. Die Einträge der beiden Vektoren können wir als Wertepaare $(x_1,y_1), \ldots, (x_{11}, y_{11})$ betrachten. Erzeugen Sie mit \texttt{plot()} ein Streudiagramm dieser Daten.
+
+```{r, Aufgabe 3}
+plot(x, y, main = "Streudiagramm")
+```
+
+4. Lesen Sie \emph{Section 5: Multivariate Data} und lernen Sie den Datentyp \texttt{data.frame} kennen. Erstellen Sie einen \texttt{data.frame} aus \texttt{x} und \texttt{y}.
+
+```{r, Aufgabe 4}
+data <- data.frame(x = x, y = y)
+data
+```
+
+5. Schätzen Sie die Koeffizienten $\beta_0$ und $\beta_1$ des linearen Modells $y = \beta_0 + \beta_1 x + u$ mithilfe der Funktion \texttt{lm()} (steht für \emph{lineares Modell}). Erklärungen finden Sie in \emph{Section 13: Regression Analysis}. Zeichnen Sie dann mithilfe von \texttt{abline()} die angepasste Regressionsgerade in Ihr Streudiagramm ein.
+
+```{r, Aufgabe 5}
+model <- lm(formula = y ~ x, data = data)
+plot(data)
+abline(model)
+```
+
+6. Erklären Sie den Output von \texttt{summary()}, angewendet auf Ihr geschätztes Modell.
+
+```{r, Aufgabe 6}
+summary(model)
+```
+
+\comment{
+Eine Erklärung des Outputs liefert \href{https://www.youtube.com/watch?v=NEfjirpOj7s}{https://www.youtube.com/watch?v=NEfjirpOj7s}.}
+
+7. \texttt{R Markdown} ist eine Kombination aus \texttt{R}, unserer Programmiersprache für Datenanalyse, und \texttt{Markdown}, einer einfachen Auszeichnungssprache für die Erstellung von Berichten. Durch die Kombination können wir \texttt{R} Code direkt in Textdokumente integrieren und mit minimalem Aufwand dynamische Analyseberichte generieren. Entwickelt wurde \texttt{R Markdown} 2014 von Yihui Xie, der einen \href{https://www.youtube.com/watch?v=LussVnrLZKU}{einfachen Weg gesucht hat, seine \texttt{R} Hausaufgaben aufzuschreiben}. Das Buch \emph{R for Data Science} von Hadley Wickham bietet unter anderem eine gute Einführung in \texttt{R Markdown}. Das Buch ist kostenlos online unter \href{https://r4ds.had.co.nz/}{https://r4ds.had.co.nz/} verfügbar. Lesen Sie \emph{Chapter 27: R Markdown}, um zu lernen, wie ein \texttt{R Markdown} Dokument erstellt werden kann. Verwenden Sie die Vorlage aus Abschnitt 27.2 und erstellen Sie selbst ein \texttt{R Markdown} Dokument im \texttt{.html}-Format.
+
+\comment{Dazu in R Studio links oben \texttt{File > New File > R Markdown} wählen. Es öffnet sich ein Fenster, dort links unten auf \texttt{Create Empty Document} klicken. Es öffnet sich eine leere Datei, dort die Vorlage einfügen. Anschließend auf \texttt{Knit} klicken.}
+    
+8. Fügen Sie in das \texttt{R Markdown} Dokument Ihre Lösungen aus Aufgabe 1 ein.
+
+\ifcomment
+\begin{verbatim}
+---
+title: "Aufgabenblatt 0"
+date: "13.10.2023"
+author: "Lennart"
+output: html_document
+---
+Aufgabe 1
+
+```{ r }
+x <- c(10, 8, 13, 9, 11, 14, 6, 4, 12, 7, 5)
+y <- c(8.1, 6.9, 7.5, 8.8, 8.3, 9.9, 7.2, 4.2, 10.8, 4.8, 5.6)
+```
+\end{verbatim}
+\fi
+
+9. Wie können Sie ein \texttt{.pdf}-Dokument erstellen?
+
+\comment{Indem \texttt{output:\ html\_document} durch \texttt{output:\ pdf\_document} ersetzt wird.}
+
+10. Wie wird das multiple lineare Regressionsmodell definiert, und wie können die Modellparameter geschätzt werden?
+
+\comment{
+Eine Variable $y$ wird mit $k$ Regressoren $x_k$ durch $y = \sum_{j = 1}^k x_j \beta_j + u$ erklärt. Der $u$ Term beinhaltet den Modellfehler,  die $\beta_j$'s sind Modellparameter. Es sollen konkrete Werte für die Parameter gefunden werden, die am besten zu gegebenen Daten passen. Die populärste Methode ist der Kleinste-Quadrate-Schätzer: Er bestimmt solche Schätzwerte, sodass die Summe der quadrierten Residuen minimal ist.
+}
+
+11. Welche Eigenschaften hat der Kleinste-Quadrate Schätzer, und welche Voraussetzungen müssen dafür erfüllt sein?
+
+\comment{
+Unter den Annahmen MLR.1 (lineares Modell), MLR.2 (Zufallsstichprobe), MLR.3 (Information in den Regressoren, keine Multikollinearität) und MLR.4 (bedingte Fehlererwartung ist Null) ist der KQ-Schätzer erwartungstreu. Gilt zusätzlich MLR.5 (Homoskedastie), so ist die Varianz des KQ-Schätzers die minimale Varianz unter allen linearen und erwartungstreuen Schätzern (Gauss-Markov Theorem). Gilt auch MLR.6 (Fehler sind normalverteilt), so ist der KQ-Schätzer normalverteilt. Unter einer technischen Annahme an die Daten ist er konsistent.
+}
+
+12. Bitte prognostizieren Sie den $y$ Wert für $x_1 = 6$ und $x_2 = -1$, gegeben die Daten
+\begin{align*}
+    x_1 &= \begin{pmatrix} 1 & 2 & 3 & 4 & 5 & 1 & 2 & 3 & 4 & 5 \end{pmatrix}, \\
+    x_2 &= \begin{pmatrix} 1 & 1 & 2 & 2 & 3 & 3 & 4 & 4 & 5 & 5 \end{pmatrix}, \\
+    y   &= \begin{pmatrix} 1 & 3 & 1 & 5 & 2 & -3 & -3 & -1 & -2 & -2 \end{pmatrix}.
+\end{align*} 
+
+```{r, Aufgabe 12}
+x_1 <- c(1, 2, 3, 4, 5, 1, 2, 3, 4, 5)
+x_2 <- c(1, 1, 2, 2, 3, 3, 4, 4, 5, 5)
+y <- c(1, 3, 1, 5, 2, -3, -3, -1, -2, -2)
+data <- data.frame(y, x_1, x_2)
+model <- lm(y ~ x_1 + x_2, data)
+model$coefficients %*% c(1, 6, -1)
+```
+
+13. Die Schlusskurse von Bitcoin und Ethereum aus $2022$ haben eine Kovarianz von $7718820$. Kann daraus ein starker, positiver Zusammenhang geschlossen werden?
+
+\comment{
+Eine positive Kovarianz zeigt einen positiven Zusammenhang an. Sie ist aber nicht normiert, daher bleibt die relative Stärke des Zusammenhanges unbekannt.
+}
+
+```{r, Aufgabe 13}
+btc <- fHMM::download_data("BTC-USD", from = "2022-01-01", to = "2022-12-31")
+eth <- fHMM::download_data("ETH-USD", from = "2022-01-01", to = "2022-12-31")
+cov(btc$Close, eth$Close)
+cor(btc$Close, eth$Close)
+```
+
+14. Finden Sie ein Beispiel, dass im Allgemeinen $\Var (X + Y) \neq \Var (X) + \Var (Y)$ für zwei Zufallsvariablen $X$ und $Y$ gilt.
+
+\comment{Sei $X = Y \sim N(0, 1)$. Dann ist $\Var (X) = \Var (Y) = 1$, aber $\Var (X+Y) = 4$.}
+
+15. Finden Sie zwei Zufallsvariablen, die unkorreliert, aber nicht unabhängig sind.
+
+\comment{
+Wähle $X,Y$ unabhängig mit $\Pr(X=0)=\Pr(X=1)=0.5$, $\Pr(Y=-1)=\Pr(Y=1)=0.5$ und definiere $Z := XY$. Dann ist $\Cov (Z,X) = \E (Z(X-0.5)) = \E(X^2-0.5X) \E(Y)=0$ aber $\Pr(Z=1\mid X = 0) = 0 \neq 0.5 = \Pr(Z=1\mid X = 1)$.
+}
+
+16. Finden Sie zwei reelle Vektoren $x$ und $y$, jeweils der Länge $10$, sodass die empirische Korrelation $\widehat{\text{Cor}} (x,y)$ exakt $-1$ bzw. $0$ bzw. $+1$ beträgt.
+
+```{r, Aufgabe 16}
+x <- 1:10
+y <- x
+cor(x, y)
+y <- -x
+cor(x, y)
+y <- (x - mean(x))^2
+cor(x, y)
+```
+
+17. Es seien $X,Y$ zwei unabhängige Zufallsvariablen, die mit gleicher Wahrscheinlichkeit die Werte in $\{1, 2, 3\}$ annehmen. Berechnen Sie $\E (1 + 4X + 2Y \mid X = 2)$.
+
+\comment{
+$\E (1 + 4X + 2Y \mid X = 2) = 9 + 2\E (Y) = 13$
+}
+
+18. Ein Losverkäufer behauptet, dass mindestens $20\%$ seiner Lose Gewinne seien. Die Käufer aber vermuten, dass der Anteil geringer ist. Es werden $n = 100$ Lose überprüft.  Führen Sie einen statistischen Test zum Signifikanzniveau $\alpha = 5\%$ zur Streitschlichtung durch, wobei Sie die Aussage des Losverkäufers als Nullhypothese wählen.
+
+\comment{
+Der Anteil an Gewinnlosen sei binomialverteilt zu $n = 100$ und $p = 20\%$. Die Wahrscheinlichkeit, höchstens $14$ Erfolge zu haben, beträgt somit $8\%$, und höchstens $13$ Erfolge zu haben, $4.7\%$. Zu $\alpha = 5\%$ geben wir also dem Losverkäufer recht, falls in der Stichprobe mindestens $14$ Gewinne sind, ansonsten den Käufern. Siehe \url{https://www.youtube.com/watch?v=MBf9Iin6bpg} für mehr Details.
+}
+
+```{r, Aufgabe 18}
+pbinom(13, size = 100, prob = 0.2)
+pbinom(14, size = 100, prob = 0.2)
+
+binom.test(13, n = 100, p = 0.2, alternative = "less")
+binom.test(14, n = 100, p = 0.2, alternative = "less")
+```
+
+19. Angenommen, der wahre Anteil an Gewinnlosen beträgt nur $10\%$. Berechnen Sie die Wahrscheinlichkeit, mit der Ihr Test dem Losverkäufer fälschlicherweise recht gibt.
+
+\comment{Das ist die Wahrscheinlichkeit, unter der Binomialverteilung mit $n = 100$ und $p = 10\%$ mindestens $14$ Erfolge zu beobachten. Sie beträgt $12.4\%$.
+}
+
+```{r, Aufgabe 19}
+f.x <- function(x, p) dbinom(x, size = 100, prob = p)
+plot(0:100, f.x(x = 0:100, p = 0.2), type = "o", xlab = "x", ylab = "f.x")
+lines(0:13, f.x(x = 0:13, p = 0.2), type = "o", col = "red")
+lines(0:100, f.x(x = 0:100, p = 0.1), type = "o", col = "blue")
+abline(v = 14)
+1 - pbinom(13, size = 100, prob = 0.1)
+```
+
+20. Sie möchten die in b) berechnete Wahrscheinlichkeit auf unter $5\%$ reduzieren. Auf welche Werte müssen Sie dafür entweder $\alpha$ oder $n$ verändern?
+
+```{r, Aufgabe 20}
+pbinom(15, size = 100, prob = 0.2)
+1 - pbinom(15, size = 100, prob = 0.1)
+
+n_range <- 1:1000
+crit <- qbinom(0.05, size = n_range, prob = 0.2)
+beta <- 1 - pbinom(crit - 1, size = n_range, prob = 0.1)
+plot(n_range, beta, type = "l")
+abline(h = 0.05)
+min(which(beta < 0.05))
+```
+
+\comment{
+Entweder $\alpha$ auf mindestens $13\%$ oder $n$ auf mindestens $135$ erhöhen.
+}
+
+
+
