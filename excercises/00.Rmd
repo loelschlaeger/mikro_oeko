@@ -243,5 +243,50 @@ min(which(beta < 0.05))
 Entweder $\alpha$ auf mindestens $13\%$ oder $n$ auf mindestens $135$ erhöhen.
 }
 
+21. Es seien $X_1$ und $X_2$ zwei unabhängige Zufallsvariablen mit Varianz 1. Wie lautet die Kovarianzmatrix von $\begin{pmatrix} 1 & 1 \\ 0 & 1\end{pmatrix} \begin{pmatrix} X_1 \\ X_2 \end{pmatrix} = \begin{pmatrix} X_1 + X_2 \\ X_2 \end{pmatrix}$?
+
+\comment{
+Es gilt
+\begin{align*}
+  \Cov \begin{pmatrix} X_1 + X_2 \\ X_2 \end{pmatrix} = \begin{pmatrix} \Var(X_1 + X_2) & \Cov(X_1 + X_2, X_2) \\ \Cov(X_2, X_1 + X_2) & \Var(X_2) \end{pmatrix} = \begin{pmatrix} 2 & 1 \\ 1 & 1 \end{pmatrix}
+\end{align*}
+da $\Var(X_1 + X_2) = \Var(X_1) + \Var(X_2)$ und $\Cov(X_1 + X_2, X_2) = \Cov(X_2, X_1 + X_2) = \Cov(X_2, X_1) + \Cov(X_2, X_2) = 0 + 1$ (wegen Unabhängigkeit) ist.
+
+Alternativ können wir die Rechenregel $\Cov(AX) = A\Cov(X)A^\top$ verwenden:
+\begin{align*}
+  \Cov \left(\begin{pmatrix} 1 & 1 \\ 0 & 1\end{pmatrix} \begin{pmatrix} X_1 \\ X_2 \end{pmatrix}\right) = \begin{pmatrix} 1 & 1 \\ 0 & 1\end{pmatrix} \Cov \begin{pmatrix} X_1 \\ X_2 \end{pmatrix} \begin{pmatrix} 1 & 0 \\ 1 & 1\end{pmatrix} = \begin{pmatrix} 1 & 1 \\ 0 & 1\end{pmatrix} \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix} \begin{pmatrix} 1 & 0 \\ 1 & 1\end{pmatrix} = \begin{pmatrix} 2 & 1 \\ 1 & 1 \end{pmatrix}
+\end{align*}
+
+Hier ist wieder wegen Unabhängigkeit $\begin{pmatrix} X_1 \\ X_2 \end{pmatrix} = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$.
+}
+
+22. Betrachten Sie die folgende Kontingenztabelle, die drei Alterskategorien und die Präferenz für Tee oder Kaffee in einer Gruppe von 30 Personen zeigt:
+
+|                 | Tee   | Kaffee |
+|-----------------|-------|--------|
+| jung            | 14    | 1      |
+| mittelalt       | 2     | 8      |
+| älter           | 3     | 2      |
+
+\begin{itemize}
+  \item Erstellen Sie die Randverteilung der Alterskategorien.
+  
+  \comment{
+    $\Pr(\text{jung}) = 15 / 30$, $\Pr(\text{mittelalt}) = 10 / 30$, $\Pr(\text{älter}) = 5 / 30$
+  }
+  
+  \item Finden Sie die bedingte Verteilung der Getränkepräferenz gegeben das Alter.
+  
+  \comment{
+    $\Pr(\text{Tee} \mid \text{jung}) = 14 / 15$, $\Pr(\text{Tee} \mid \text{mittelalt}) = 2 / 10$, $\Pr(\text{Tee} \mid \text{älter}) = 3 / 5$ (Kaffee analog)
+  }
+  
+  \item Berechnen Sie die gemeinsame Verteilung von Alter und Getränkepräferenz.
+  
+  \comment{
+    Dividiere die Tabellenelemente durch 30, zum Beispiel $\Pr(\text{Tee}, \text{jung}) = 14 / 30$.
+  }
+\end{itemize}
+
 
 
