@@ -20,62 +20,172 @@ knitr::opts_chunk$set(
 
 ## Überblick
 
-In der gepoolten Querschnittsanalyse liegen mehrere Zufallsstichproben vor, die die gleiche Struktur, d.h. Beobachtungen über die gleichen Variablen aufweisen. Eine Idee ist dann, die Daten in einem \emph{Pool} zusammenzuführen um so eine Stichprobe mit größerem Umfang zu erhalten.
-
-Dabei können verschiedene Probleme entstehen, da sich die Verteilungen der Beobachtungen in den einzelnen Stichproben unterscheiden können. Ein konkretes Problem könnte sein, dass die Stichproben zu unterschiedlichen Zeitpunkten erhoben wurden, zu denen zwar das zugrundeliegende Modell gleichgeblieben ist, die Koeffizienten sich jedoch verändert haben. Verschiedene Problemlagen sollen in diesem und dem nächsten Übungsblatt analysiert werden.
+*Querschnittsdaten* gehen von der Beobachtung der gleichen Variablen von verschiedenen Individuen zu einem Zeitpunkt aus. Manchmal wird die Datenerhebung parallel an verschiedenen Orten durchgeführt oder zu einem späteren Zeitpunkt wiederholt. Es ergibt sich eine Sammlung an struktuell gleichen Datensätzen, für die jeweils das gleiche Modell angenommen wird. Eine Idee ist dann, anstatt separate Modelle zu schätzen, die Daten in einem *Pool* zusammenzuführen. 
 
 ## Aufgaben
 
-In dieser Aufgabe soll der Einfluss der Ausbildungsjahre auf den Stundenlohn untersucht werden. Dazu wird das folgende Modell für die Population spezifiziert,
-
+1. Wofür kann das folgende Modell eingesetzt werden?
 \begin{equation} \label{ausgangsmodell}
 wage = \beta_0 + \beta_1 educ + u
 \end{equation}
 
-wobei \emph{wage} den Stundenlohn bezeichnet und \emph{educ} die Ausbildung in Jahren.
+\comment{
+Einfluss der Ausbildungszeit auf den Stundenlohn (wenn $wage$ den Stundenlohn und $educ$ die Ausbildung in Jahren bezeichnet)
+}
 
-1. Unter welcher Annahme ist das obige Modell korrekt spezifiziert?
+2. Unter welcher Annahme ist Modell \eqref{ausgangsmodell} korrekt spezifiziert?
 
-```{r}
+\comment{
+wenn $E(u\mid wage) = 0$ gilt
+}
+
+3. Mit dem Datensatz `wooldridge::cps78_85` (die `::` Notation bedeutet, dass auf das Objekt `cps78_85` im `R` Paket `wooldridge` zugegriffen wird) kann Modell \eqref{ausgangsmodell} geschätzt werden. Lesen Sie die Daten in `R` ein. Unter `?wooldridge::cps78_85` finden Sie eine Beschreibung.
+
+```{r, Aufgabe 3}
 data <- wooldridge::cps78_85
-wage <- exp(data$lwage)
+```
 
-### wage
-model <- lm(wage ~ educ, data)
-white <- lm(residuals(model) ~ predict(model) + I(predict(model)^2))
-summary(white)
+4. Die Variable $educ$ ist im Datensatz vorhanden, $wage$ fehlt. Aber wir können die $wage$ Variable aus dem Datensatz konstruieren -- wie?
 
-### log wage
-model <- lm(lwage ~ educ, data)
-white <- lm(residuals(model) ~ predict(model) + I(predict(model)^2))
+```{r, Aufgabe 4}
+data$wage <- exp(data$lwage)
+```
+
+5. Bei dem Datensatz handelt es sich um einen *gepoolten* Datensatz -- warum?
+
+\comment{
+beinhaltet Beobachtungen aus zwei unabhängigen Stichproben aus den Jahren 1978 und 1985 mit der gleichen Struktur
+}
+
+6. Verschaffen Sie sich einen Überblick von der (konstruierten) $wage$ und der $educ$ Variable und unterscheiden Sie dabei auch zwischen den beiden Erhebungen. 
+
+```{r, Aufgabe 6}
+str(data)
+
+plot(
+  data$educ[data$y85 == 0], 
+  data$wage[data$y85 == 0], 
+  main = "Zusammenhang Ausbildung und Gehalt in 1978 vs. 1985", 
+  xlab = "educ (Ausbildungszeit in Jahren)", 
+  ylab = "wage (Stundenlohn in USD)",
+  xlim = c(0, max(data$educ)),
+  ylim = c(0, max(data$wage))
+)
+points(
+  data$educ[data$y85 == 1] + 0.15, 
+  data$wage[data$y85 == 1], 
+  col = "red"
+)
+legend(
+  "topleft", 
+  legend = c("1978", "1985"), 
+  col = c(1:2), 
+   pch = "o"
+)
+```
+
+7. Schätzen Sie das *gepoolte Regressionsmodell* in \eqref{ausgangsmodell} und interpretieren Sie die Koeffizienten. Sind die Koeffizienten statistisch signifikant?
+
+```{r, Aufgabe 7}
+model <- lm(formula = wage ~ educ, data = data)
+summary(model)
+```
+
+\comment{
+Ein zusätzliches Ausbildungsjahr erhöht den durchschnittlichen Stundenlohn um $\hat\beta_1 = 0.58$ USD. Ohne Ausbildung ($educ = 0$) Liegt der Stundenlohn bei durchschnittlich $\hat\beta_0 = 0.17$ USD. Die Konstante ist nicht signifikant (sie sollte dennoch im Modell verbleiben, um den Modellierungsspielraum nicht zu stark einzuschränken). Der Steigungsparameter ist hochsignifikant.
+}
+
+8. Überprüfen Sie, ob die Annahme der Homoskedastie verletzt ist.
+
+\comment{
+Die Aussagen über die statistische Signifikanz der Schätzungen gilt nur unter dem Vorbehalt homoskedastischer Fehler. Falls diese Annahme verletzt ist, können die regulären Standardfehler nicht für $t$- und $F$-Tests verwendet werden. Um die Homoskedasizität zu überprüfen können wir die Residuen gegen die gefitteten Werte plotten oder formal einen Breusch-Pagan oder White-Test durchführen.
+}
+
+```{r, Aufgabe 8}
+plot(
+  model$fitted, model$residuals,
+  xlab = "angepasste Werte",
+  ylab = "Residuen"
+)
+abline(h = 0)
+
+breusch_pagan <- lm(formula = I(model$residuals^2) ~ data$educ)
+summary(breusch_pagan)
+
+white <- lm(formula = I(model$residuals^2) ~ model$fitted + I(model$fitted^2))
 summary(white)
 ```
-	
-2. Der Datensatz \texttt{cps78\_85.csv} aus Wooldridge (2009) beinhaltet Beobachtungen aus zwei unabhängigen Stichproben aus den Jahren 1978 und 1985. Lesen Sie den Datensatz ein und machen Sie sich ein Bild von den Variablen \texttt{wage} und \texttt{educ}. Unterscheiden Sie auch zwischen den einzelnen Stichproben.
 
-3. Schätzen Sie das gepoolte Regressionsmodell in \eqref{ausgangsmodell} und interpretieren Sie die Koeffizienten. Sind die Koeffizienten statistisch signifikant?
+\comment{
+Im Plot erkennen wir, dass die Varianz der Residuen mit der Größe der gefitteten Werte ansteigt. Bei den Tests betrachten wir jeweils die $F$-Teststatistik. Basierend auf den $p$-Werten schließen wir, dass wir die Nullhypothese der Homoskedastie bei beiden Tests verwerfen.
+}
 
-4. Plotten Sie die Residuen $\hat{u}$ gegen die gefitteten Werte $\hat{y}$. Ist die Varianz der Residuen konstant? Testen Sie mithilfe des Breusch-Pagan-Tests (z.B. Wooldridge 2009: 273), ob die Annahme der Homoskedastie verletzt ist.
+9. Welche Auswirkungen hat Heteroskedastie auf die KQ-Schätzung? 
 
-5. Welche Auswirkungen hat Heteroskedastie auf die KQ-Schätzung? Welche Möglichkeiten gibt es, mit dem Problem der Heteroskedastie umzugehen?
+\comment{
+Der KQ-Schätzer bleibt unverzerrt und konsistent, das ist erstmal gut. Aber die Schätzung der Standardfehler ist bei Heteroskedastie verzerrt. Und wenn diese Berechnung nicht mehr stimmt, können wir uns auf die $t$- und $F$-Tests sowie Konfidenz- und Prognoseintervalle nicht mehr verlassen. Außerdem ist der KQ-Schätzer dann nicht der BLUS (es gibt also lineare, unverzerrte Schätzer mit geringerer Varianz).
+}
 
-6. Prüfen Sie im folgenden Modell, ob Heteroskedastie vorliegt.
+10. Wie können wir (hier) mit dem Problem der Heteroskedastie umzugehen?
+
+\comment{
+1. Möglichkeit: Variablentransformation, zum Beispiel
 \begin{equation} \label{log_modell}
 \log(wage) = \beta_0 + \beta_1 educ + u
 \end{equation}
-Sind die Koeffizienten statistisch signifikant? Wie sind die Parameter $\beta_0$ und $\beta_1$ zu interpretieren?
+2. Möglichkeit: Heteroskedastie-robuste Standardfehler (siehe Vorlesungsfolien)
+3. Möglichkeit: (Feasible) Generalised Least Squares (F)GLS Schätzung (ist der BLUS)
+}
 
-7. Schätzen Sie nun ein Modell, das für das zweite Jahr eine eigene Konstante zulässt.
+```{r, Aufgabe 10}
+model_log <- lm(formula = lwage ~ educ, data = data)
+summary(model_log)
+
+plot(
+  model_log$fitted, model_log$residuals,
+  xlab = "angepasste Werte (log Modell)",
+  ylab = "Residuen (log Modell)"
+)
+abline(h = 0)
+
+breusch_pagan <- lm(formula = I(model_log$residuals^2) ~ data$educ)
+summary(breusch_pagan)
+
+white <- lm(formula = I(model_log$residuals^2) ~ model_log$fitted + I(model_log$fitted^2))
+summary(white)
+```
+
+11. Schätzen Sie nun ein *log-level Modell*, das für 1985 eine eigene Konstante zulässt:
 \begin{equation} \label{dummy_modell}
 \log(wage) = \beta_0 + \beta_1 educ + \gamma_0 y85 + u
 \end{equation}
-Welche Interpretation besitzt $\gamma_0$? Ist es gerechtfertigt, die Konstante im Modell zu behalten? Argumentieren Sie!
+Welche Interpretation hat $\gamma_0$? 
 
-8. Schätzen Sie als nächstes das folgende Modell, das zusätzlich einen Interaktionsterm enthält.
-\begin{equation} \label{dummy_interaktion_modell}
-\log(wage) = \beta_0 + \beta_1 educ + \gamma_0 y85 + \gamma_1 y85 \cdot educ + u
+```{r, Aufgabe 11}
+model_log_dummy <- lm(formula = lwage ~ educ + y85, data = data)
+summary(model_log_dummy)
+```
+
+\comment{
+Im obigen Modell steht $\gamma_0$ für den Niveauunterschied des durchschnittlichen logarithmierten Lohns zwischen den Jahren 1978 und 1985. $\beta_0 + \gamma_0$ gibt also den durchschnittlichen logarithmierten Lohn für das Jahr 1985 für den Fall $educ = 0$ an. In Bezug auf den Lohn selbst erhalten wir die Interpretation als Prozentsatz: es wurde ein um $\hat\gamma_0 = 34.76$ Prozent gestiegenes durchschnittliches Lohnniveau für das Jahr 1985 geschätzt. Vermutlich hat besonders Inflation dafür gesorgt.
+}
+
+12. Inkludieren Sie zusätzlich den Interaktionsterm $(y85 \cdot educ)$. Welche Interpretation hat der zugehörige Koeffizient?
+
+\comment{
+Wir schätzen das Modell
+\begin{equation} \label{dummy_interact_modell}
+\log(wage) = \beta_0 + \beta_1 educ + \gamma_0 y85 + \gamma_1 (y85 \cdot educ) + u.
 \end{equation}
-Welche Interpretation besitzt $\gamma_1$? Bleibt die Interpretation von $\gamma_0$ aus Aufgabenteil (g) gleich? Sind die Koeffizienten statistisch signifikant?
+}
 
-9. Wie kann getestet werden, ob die Koeffizienten gemeinsam signifikant sind? Führen Sie den Test durch.
+```{r, Aufgabe 12}
+model_log_dummy_interact <- lm(formula = lwage ~ educ + y85 + I(y85 * educ), data = data)
+summary(model_log_dummy_interact)
+```
+
+\comment{
+Interpretation: $\hat\beta_1+ \hat\gamma_1$ steht für die prozentuale Veränderung des mittleren Lohns auf eine Veränderung von $educ$ um eine Einheit für das Jahr 1985. Damit gibt $\gamma_1$ also den Unterschied im Steigungsparameter zwischen 1978 und 1985 an.
+}
+
 
