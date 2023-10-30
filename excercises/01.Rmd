@@ -9,7 +9,7 @@ output:
   pdf_document:
     template: template.tex
     highlight: null
-solution: true
+solution: false
 ---
 
 ```{r setup, include=FALSE}
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 ## Überblick
 
-*Querschnittsdaten* gehen von der Beobachtung der gleichen Variablen von verschiedenen Individuen zu einem Zeitpunkt aus. Manchmal wird die Datenerhebung parallel an verschiedenen Orten durchgeführt oder zu einem späteren Zeitpunkt wiederholt. Es ergibt sich eine Sammlung an struktuell gleichen Datensätzen, für die jeweils das gleiche Modell angenommen wird. Eine Idee ist dann, anstatt separate Modelle zu schätzen, die Daten in einem *Pool* zusammenzuführen. 
+*Querschnittsdaten* beinhalten Beobachtung der gleichen Variablen von verschiedenen Individuen zu einem Zeitpunkt. Manchmal wird die Datenerhebung parallel an verschiedenen Orten durchgeführt oder zu einem späteren Zeitpunkt wiederholt. Dann ergibt sich eine Sammlung an struktuell gleichen Datensätzen, für die jeweils das gleiche Modell angenommen werden kann. Eine naheliegende Idee ist, anstatt separate Modelle zu schätzen, die Daten in einem *Pool* zusammenzuführen. 
 
 ## Aufgaben
 
@@ -30,13 +30,13 @@ wage = \beta_0 + \beta_1 educ + u
 \end{equation}
 
 \comment{
-Einfluss der Ausbildungszeit auf den Stundenlohn (wenn $wage$ den Stundenlohn und $educ$ die Ausbildung in Jahren bezeichnet)
+Das Modell kann zur Bestimmung des Einflusses der Ausbildungszeit auf den Stundenlohn (wenn $wage$ den Stundenlohn und $educ$ die Ausbildung in Jahren bezeichnet) eingesetzt werden.
 }
 
 2. Unter welcher Annahme ist Modell \eqref{ausgangsmodell} korrekt spezifiziert?
 
 \comment{
-wenn $E(u\mid wage) = 0$ gilt
+Das Modell ist korrekt spezifiziert, wenn $E(u\mid wage) = 0$ gilt.
 }
 
 3. Mit dem Datensatz `wooldridge::cps78_85` (die `::` Notation bedeutet, dass auf das Objekt `cps78_85` im `R` Paket `wooldridge` zugegriffen wird) kann Modell \eqref{ausgangsmodell} geschätzt werden. Lesen Sie die Daten in `R` ein. Unter `?wooldridge::cps78_85` finden Sie eine Beschreibung.
@@ -54,7 +54,7 @@ data$wage <- exp(data$lwage)
 5. Bei dem Datensatz handelt es sich um einen *gepoolten* Datensatz -- warum?
 
 \comment{
-beinhaltet Beobachtungen aus zwei unabhängigen Stichproben aus den Jahren 1978 und 1985 mit der gleichen Struktur
+Weil der Datensatz Beobachtungen aus zwei unabhängigen Stichproben aus den Jahren 1978 und 1985 mit der gleichen Struktur beinhaltet.
 }
 
 6. Verschaffen Sie sich einen Überblick von der (konstruierten) $wage$ und der $educ$ Variable und unterscheiden Sie dabei auch zwischen den beiden Erhebungen. 
@@ -92,13 +92,13 @@ summary(model)
 ```
 
 \comment{
-Ein zusätzliches Ausbildungsjahr erhöht den durchschnittlichen Stundenlohn um $\hat\beta_1 = 0.58$ USD. Ohne Ausbildung ($educ = 0$) Liegt der Stundenlohn bei durchschnittlich $\hat\beta_0 = 0.17$ USD. Die Konstante ist nicht signifikant (sie sollte dennoch im Modell verbleiben, um den Modellierungsspielraum nicht zu stark einzuschränken). Der Steigungsparameter ist hochsignifikant.
+Ein zusätzliches Ausbildungsjahr erhöht den durchschnittlichen Stundenlohn um $\hat\beta_1 = 0.58$ USD. Ohne Ausbildung ($educ = 0$) liegt der Stundenlohn bei durchschnittlich $\hat\beta_0 = 0.17$ USD. Die Konstante ist nicht signifikant (sie sollte dennoch im Modell verbleiben, um den Modellierungsspielraum nicht zu stark einzuschränken). Der Steigungsparameter ist hochsignifikant.
 }
 
 8. Überprüfen Sie, ob die Annahme der Homoskedastie verletzt ist.
 
 \comment{
-Die Aussagen über die statistische Signifikanz der Schätzungen gilt nur unter dem Vorbehalt homoskedastischer Fehler. Falls diese Annahme verletzt ist, können die regulären Standardfehler nicht für $t$- und $F$-Tests verwendet werden. Um die Homoskedasizität zu überprüfen können wir die Residuen gegen die gefitteten Werte plotten oder formal einen Breusch-Pagan oder White-Test durchführen.
+Die Aussagen über die statistische Signifikanz der Schätzungen gilt nur unter dem Vorbehalt homoskedastischer Fehler. Falls diese Annahme verletzt ist, können die regulären Standardfehler nicht für $t$- und $F$-Tests verwendet werden. Um die Homoskedastizität zu überprüfen können wir die Residuen gegen die gefitteten Werte plotten oder formal einen Breusch-Pagan oder White-Test durchführen.
 }
 
 ```{r, Aufgabe 8}
@@ -130,10 +130,12 @@ Der KQ-Schätzer bleibt unverzerrt und konsistent, das ist erstmal gut. Aber die
 
 \comment{
 1. Möglichkeit: Variablentransformation, zum Beispiel
-\begin{equation} \label{log_modell}
+\begin{equation*}
 \log(wage) = \beta_0 + \beta_1 educ + u
-\end{equation}
+\end{equation*}
+
 2. Möglichkeit: Heteroskedastie-robuste Standardfehler (siehe Vorlesungsfolien)
+
 3. Möglichkeit: (Feasible) Generalised Least Squares (F)GLS Schätzung (ist der BLUS)
 }
 
@@ -170,22 +172,24 @@ summary(model_log_dummy)
 Im obigen Modell steht $\gamma_0$ für den Niveauunterschied des durchschnittlichen logarithmierten Lohns zwischen den Jahren 1978 und 1985. $\beta_0 + \gamma_0$ gibt also den durchschnittlichen logarithmierten Lohn für das Jahr 1985 für den Fall $educ = 0$ an. In Bezug auf den Lohn selbst erhalten wir die Interpretation als Prozentsatz: es wurde ein um $\hat\gamma_0 = 34.76$ Prozent gestiegenes durchschnittliches Lohnniveau für das Jahr 1985 geschätzt. Vermutlich hat besonders Inflation dafür gesorgt.
 }
 
-12. Inkludieren Sie zusätzlich den Interaktionsterm $(y85 \cdot educ)$. Welche Interpretation hat der zugehörige Koeffizient?
+12. Inkludieren Sie zusätzlich den Interaktionsterm $(y85 \cdot educ)$ in das Modell \eqref{dummy_modell}. Welche Interpretation hat der zugehörige Koeffizient?
 
 \comment{
 Wir schätzen das Modell
-\begin{equation} \label{dummy_interact_modell}
+\begin{equation*}
 \log(wage) = \beta_0 + \beta_1 educ + \gamma_0 y85 + \gamma_1 (y85 \cdot educ) + u.
-\end{equation}
+\end{equation*}
 }
 
 ```{r, Aufgabe 12}
-model_log_dummy_interact <- lm(formula = lwage ~ educ + y85 + I(y85 * educ), data = data)
+model_log_dummy_interact <- lm(
+  formula = lwage ~ educ + y85 + I(y85 * educ), data = data
+)
 summary(model_log_dummy_interact)
 ```
 
 \comment{
-Interpretation: $\hat\beta_1+ \hat\gamma_1$ steht für die prozentuale Veränderung des mittleren Lohns auf eine Veränderung von $educ$ um eine Einheit für das Jahr 1985. Damit gibt $\gamma_1$ also den Unterschied im Steigungsparameter zwischen 1978 und 1985 an.
+Interpretation: $\hat\beta_1+ \hat\gamma_1$ steht für die prozentuale Veränderung des mittleren Lohns auf eine Veränderung von $educ$ um eine Einheit für das Jahr 1985. Damit gibt $\gamma_1$ also den Unterschied im Steigungsparameter zwischen 1978 und 1985 an. Anscheinend zahlt sich Bildung in 1985 mehr aus als es noch in 1978 der Fall war.
 }
 
 
