@@ -98,7 +98,7 @@ Ein zusätzliches Ausbildungsjahr erhöht den durchschnittlichen Stundenlohn um 
 8. Überprüfen Sie, ob die Annahme der Homoskedastie verletzt ist.
 
 \comment{
-Die Aussagen über die statistische Signifikanz der Schätzungen gilt nur unter dem Vorbehalt homoskedastischer Fehler. Falls diese Annahme verletzt ist, können die regulären Standardfehler nicht für $t$- und $F$-Tests verwendet werden. Um die Homoskedastizität zu überprüfen können wir die Residuen gegen die gefitteten Werte plotten oder formal einen Breusch-Pagan oder White-Test durchführen.
+Die Aussagen über die statistische Signifikanz der Schätzungen gilt nur unter dem Vorbehalt homoskedastischer Fehler. Falls diese Annahme verletzt ist, können die regulären Standardfehler nicht für $t$- und $F$-Tests verwendet werden. Um die Homoskedastizität zu überprüfen können wir die Residuen gegen die gefitteten Werte plotten oder formal einen White-Test (oder Breusch-Pagan Test) durchführen.
 }
 
 ```{r, Aufgabe 8}
@@ -109,15 +109,12 @@ plot(
 )
 abline(h = 0)
 
-breusch_pagan <- lm(formula = I(model$residuals^2) ~ data$educ)
-summary(breusch_pagan)
-
 white <- lm(formula = I(model$residuals^2) ~ model$fitted + I(model$fitted^2))
 summary(white)
 ```
 
 \comment{
-Im Plot erkennen wir, dass die Varianz der Residuen mit der Größe der gefitteten Werte ansteigt. Bei den Tests betrachten wir jeweils die $F$-Teststatistik. Basierend auf den $p$-Werten schließen wir, dass wir die Nullhypothese der Homoskedastie bei beiden Tests verwerfen.
+Im Plot erkennen wir, dass die Varianz der Residuen mit der Größe der gefitteten Werte ansteigt. Bei dem Test betrachten wir die $F$-Teststatistik. Basierend auf dem $p$-Wert schließen wir, dass wir die Nullhypothese der Homoskedastie verwerfen.
 }
 
 9. Welche Auswirkungen hat Heteroskedastie auf die KQ-Schätzung? 

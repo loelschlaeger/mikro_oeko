@@ -44,9 +44,6 @@ plot(
 )
 abline(h = 0)
 
-breusch_pagan <- lm(formula = I(model$residuals^2) ~ data$educ)
-summary(breusch_pagan)
-
 white <- lm(formula = I(model$residuals^2) ~ model$fitted + I(model$fitted^2))
 summary(white)
 
