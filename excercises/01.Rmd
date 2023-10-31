@@ -80,7 +80,7 @@ legend(
   "topleft", 
   legend = c("1978", "1985"), 
   col = c(1:2), 
-   pch = "o"
+  pch = "o"
 )
 ```
 
@@ -189,4 +189,67 @@ summary(model_log_dummy_interact)
 Interpretation: $\hat\beta_1+ \hat\gamma_1$ steht für die prozentuale Veränderung des mittleren Lohns auf eine Veränderung von $educ$ um eine Einheit für das Jahr 1985. Damit gibt $\gamma_1$ also den Unterschied im Steigungsparameter zwischen 1978 und 1985 an. Anscheinend zahlt sich Bildung in 1985 mehr aus als es noch in 1978 der Fall war.
 }
 
+13. Wenn Sie das Modell
+\begin{equation} \label{log_modell}
+\log(wage) = \beta_0 + \beta_1 educ + u
+\end{equation}
+einmal für den gepoolten Datensatz und dann für die Daten aus 1978 und 1985 getrennt schätzen, welche Unterschiede in den Koeffizienten und Varianzen erwarten Sie dann?
+
+\comment{
+Wir erwarten (leichte) Unterschiede in den geschätzten Koeffizienten und geringere Standardabweichungen für die geschätzten Koeffizienten im gepoolten Modell. Das können wir überprüfen:
+}
+
+```{r, Aufgabe 13}
+model_pool <- lm(formula = lwage ~ educ, data = data)
+summary(model_pool)
+model_1978 <- lm(formula = lwage ~ educ, data = data, subset = (y85 == 0))
+summary(model_1978)
+model_1985 <- lm(formula = lwage ~ educ, data = data, subset = (y85 == 1))
+summary(model_1985)
+```
+
+14. Die Daten sollten nur gepoolt werden, wenn sich die Koeffizienten der einzelnen Stichproben nicht signifikant voneinander unterscheiden. Bitte führen Sie einen Chow-Test durch, um die Gleichheit der Koeffizienten zu testen.
+
+\comment{
+Der Chow-Test:
+
+- Nullhypothese: die Koeffizienten der einzelnen Stichproben sind gleich
+
+- Gegenhypothese: mindestens ein Koeffizient unterscheidet sich
+
+- Teststatistik: $\displaystyle F = \frac{SSR_\text{pool} - (SSR_{1978} + SSR_{1985})}{SSR_{1978} + SSR_{1985}} \cdot \frac{n_{1978} + n_{1985} - 2(K+1)}{K + 1}$, wobei $SSR_\text{pool}$, $SSR_{1978}$ und $SSR_{1978}$ die Residuenquadratsumme des gepoolten Modells und der getrennten Modelle, $n_{1978}$ und $n_{1985}$ die Stichprobengröße in den getrennten Modellen und $K$ die Anzahl Modellparameter (ohne Achsenabschnitt) ist.
+
+- Ablehnung zum Signifikanzniveau $\alpha$: wenn die Teststatistik $F$ größer ist als das $1-\alpha$ Quantil der $F$-Verteilung mit $K+1$ und $n_{1978} + n_{1985} - 2(K+1)$ Freiheitsgraden
+}
+
+```{r, Aufgabe 14}
+### Teststatistik berechnen
+SSR_pool <- sum(model_pool$residuals^2)
+SSR_1978 <- sum(model_1978$residuals^2)
+SSR_1985 <- sum(model_1985$residuals^2) 
+n_1978 <- nobs(model_1978)
+n_1985 <- nobs(model_1985)
+K <- 1
+F <- (SSR_pool - (SSR_1978 + SSR_1985)) / (SSR_1978 + SSR_1985) * 
+  (n_1978 + n_1985 - 2 * (K + 1)) / (K + 1)
+
+### Testdurchführung
+alpha <- 0.05
+quantil <- qf(1- alpha, K + 1, n_1978 + n_1985 - 2 * (K + 1))
+F > quantil
+
+### alternativ mit p-value
+pvalue <- 1 - pf(F, K + 1, n_1978 + n_1985 - 2 * (K + 1))
+pvalue > alpha
+```
+
+\comment{
+In diesem Fall wird die Nullhypothese verworfen. Wir folgern, dass ein Poolen der Daten nicht vorgenommen werden sollte, da sich die Koeffizienten statistisch signifikant voneinander unterscheiden.
+}
+
+15. Der Chow-Test basiert auf der Annahme, dass in beiden Datensätzen die Fehlervarianz identisch sind. Wenn das nicht der Fall ist, gibt es trotzdem eine Möglichkeit, diesen Test anzuwenden -- welche?
+
+\comment{
+Statt der OLS Schätzer nehme die (F)GLS Schätzer.
+}
 
