@@ -1,0 +1,93 @@
+---
+title: "Aufgabenblatt 2"
+author: "Lennart Oelschläger"
+email: "lennart.oelschlaeger@uni-bielefeld.de"
+date: "`r format(Sys.Date(), format = '%d.%m.%Y')`"
+course: "310214 Praktische Übung zu \"Einführung in die Mikroökonometrie\""
+term: "Wintersemester 2023/2024"
+output: 
+  pdf_document:
+    template: template.tex
+    highlight: null
+solution: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  include = rmarkdown::metadata$solution, comment = '#', prompt = TRUE
+)
+```
+
+## Überblick
+
+*Heteroskedastie* ...
+
+*Paneldaten* ...
+
+## Aufgaben
+
+1. Bitte schätzen Sie das Modell
+\begin{equation} \label{modell}
+\hspace{-1cm} \texttt{cigs} = \beta_0 + \beta_1 \log(\texttt{income}) + \beta_2 \log(\texttt{cigpric}) + \beta_3 \texttt{educ} + \beta_4 \texttt{age} + \beta_5 \texttt{age}^2 + \beta_6 \texttt{restaurn} + u
+\end{equation}
+mit dem Datensatz `wooldridge::smoke` und interpretieren Sie die Koeffizienten.
+
+```{r, Aufgabe 1}
+ols_smoke <- lm(
+  formula = cigs ~ lincome + lcigpric + educ + age + I(age^2) + restaurn, 
+  data = wooldridge::smoke
+)
+summary(ols_smoke)
+```
+
+\comment{
+\begin{itemize}
+  \item $\beta_0$: durchschnittliche Anzahl gerauchter Zigaretten pro Tag für alle Regressoren gleich Null (ergibt hier keinen Sinn und ist nicht signifikant)
+  \item $\beta_1$: für eine Erhöhung des Jahreseinkommens um $1\%$ impliziert das Modell eine Erhöhung der Anzahl durchschnittlich gerauchter Zigaretten pro Tag um approximativ $0.01$ Zigaretten, ceteris paribus (nicht signifikant).
+  \item $\beta_2$: für eine Erhöhung des Packungspreises um $1\%$ impliziert das Modell eine Verminderung der Anzahl der durchschnittlich gerauchten Zigaretten pro Tag um $0.008$ Zigaretten, ceteris paribus (nicht signifikant).
+  \item $\beta_3$: für ein weiteres Jahr Schulbildung impliziert das Modell eine Verminderung der Anzahl der durchschnittlich gerauchten Zigaretten pro Tag um eine halbe Zigarette, ceteris paribus.
+  \item $\beta_4$ und $\beta_5$: der partielle Effekt ist $\beta_4 + 2\beta_5 \texttt{age}$, hält man also alle andere Variablen fix, so impliziert das Modell, dass ein um ein Jahr höheres Alter zu einer Veränderung der durchschnittlich gerauchten Zigaretten pro Tag in Höhe von approximativ $0.8 - 0.02 \times \texttt{age}$ führt.
+  \item $\beta_6$: für eine Regulierung des Rauchens in Restaurants impliziert das Modell eine Verminderung der durchschnittlich gerauchten Zigaretten pro Tag in Höhe von knapp drei Zigaretten unter sonst gleichen Bedingungen.
+\end{itemize}
+}
+
+2. Liegt in Modell \eqref{modell} Heteroskedastie vor?
+
+```{r, Aufgabe 2}
+ols_smoke_white <- lm(
+  formula = ols_smoke$residuals^2 ~ ols_smoke$fitted + I(ols_smoke$fitted^2)
+)
+summary(ols_smoke_white)
+```
+
+\comment{
+Der White-Test sagt ja!
+}
+
+3. Verwenden Sie statt OLS den FGLS-Schätzer um \eqref{modell} zu schätzen.
+
+\comment{
+Vorgehensweise der FGLS-Schätzung wird in der Vorlesung beschrieben:
+\begin{enumerate}
+  \item schätze wie gewohnt mit OLS und speichere die Residuen $u$
+  \item berechne $\log(u)$
+  \item schätze das Modell $\log(u) = \gamma_0 + \gamma' X + v$
+  \item berechne die Gewichte $1 / \exp(\hat\gamma_0 + \hat\gamma' X)$
+  \item berechne das Modell aus Schritt 1 erneut mit den Gewichten (einfach die Gewichte an das \texttt{weights} Argument der \texttt{lm()} Funktion übergeben)
+\end{enumerate}
+}
+
+```{r, Aufgabe 3}
+u <- residuals(ols_smoke)
+model_helper <- lm(
+  formula = I(log(u^2)) ~ lincome + lcigpric + educ + age + I(age^2) + restaurn,
+  data = wooldridge::smoke
+)
+weights <- 1 / exp(model.matrix(model_helper) %*% coefficients(model_helper))
+fgls_smoke <- lm(
+  formula = cigs ~ lincome + lcigpric + educ + age + I(age^2) + restaurn, 
+  data = wooldridge::smoke,
+  weights = weights
+)
+summary(fgls_smoke)
+```
