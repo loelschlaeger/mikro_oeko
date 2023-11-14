@@ -9,7 +9,7 @@ output:
   pdf_document:
     template: template.tex
     highlight: null
-solution: true
+solution: false
 ---
 
 ```{r setup, include=FALSE}
@@ -20,9 +20,9 @@ knitr::opts_chunk$set(
 
 ## Überblick
 
-*Heteroskedastie* ...
+*Heteroskedastie* liegt vor, wenn die Fehlervarianz von den Regressoren abhängt. Das hat keinen Einfluss auf die Unverzerrtheit und Konsistenz des OLS Schätzers, jedoch sind die $t$- und $F$-Tests sowie Konfidenzintervalle der OLS Schätzung und das Gauss-Markov Theorem dann nicht mehr gültig. Mit dem so genannten White-Test kann die Alternativhypothese getestet werden, dass Heteroskedastie vorliegt. Wenn das der Fall ist, haben wir drei verschiedene Möglichkeiten, damit umzugehen: Variablentransformation (zum Beispiel Logarithmierung), Nutzung von Heteroskedastie-robusten Schätzern oder der (F)GLS Schätzung.
 
-*Paneldaten* ...
+*Paneldaten* haben zusätzlich zur Querschnittsdimension eine Zeitdimension und erfassen Daten der selben Individuen über mehrere Zeitpunkte. Die *gepoolten Querschnittsdaten* sind eine Variante davon, wobei wir dort nicht davon ausgehen, die gleichen Individuen erneut zu befragen. Der *FD-Schätzer* (FD steht für First Difference) ist der einfachste Paneldatenschätzer.
 
 ## Aufgaben
 
@@ -67,27 +67,88 @@ Der White-Test sagt ja!
 3. Verwenden Sie statt OLS den FGLS-Schätzer um \eqref{modell} zu schätzen.
 
 \comment{
-Vorgehensweise der FGLS-Schätzung wird in der Vorlesung beschrieben:
+Vorgehensweise der FGLS-Schätzung wie in der Vorlesung beschrieben:
 \begin{enumerate}
   \item schätze wie gewohnt mit OLS und speichere die Residuen $u$
-  \item berechne $\log(u)$
-  \item schätze das Modell $\log(u) = \gamma_0 + \gamma' X + v$
+  \item berechne $\log(u^2)$
+  \item schätze wie gewohnt mit OLS das Modell $\log(u^2) = \gamma_0 + \gamma' X + v$
+  \item erhalte die angepassten Werte $\hat\gamma_0 + \hat\gamma' X$
   \item berechne die Gewichte $1 / \exp(\hat\gamma_0 + \hat\gamma' X)$
-  \item berechne das Modell aus Schritt 1 erneut mit den Gewichten (einfach die Gewichte an das \texttt{weights} Argument der \texttt{lm()} Funktion übergeben)
+  \item berechne das Modell aus Schritt 1 erneut mit diesen Gewichten (zum Beispiel die Gewichte an das \texttt{weights} Argument der \texttt{lm()} Funktion übergeben)
 \end{enumerate}
 }
 
 ```{r, Aufgabe 3}
+### Schritt 1
 u <- residuals(ols_smoke)
+
+### Schritt 2
+log_u_sq <- log(u^2)
+
+### Schritt 3
 model_helper <- lm(
-  formula = I(log(u^2)) ~ lincome + lcigpric + educ + age + I(age^2) + restaurn,
+  formula = log_u_sq ~ lincome + lcigpric + educ + age + I(age^2) + restaurn,
   data = wooldridge::smoke
 )
-weights <- 1 / exp(model.matrix(model_helper) %*% coefficients(model_helper))
+
+### Schritt 4
+fitted_values <- model.matrix(model_helper) %*% coefficients(model_helper)
+
+### Schritt 5
+weights <- 1 / exp(fitted_values)
+
+### Schritt 6
 fgls_smoke <- lm(
   formula = cigs ~ lincome + lcigpric + educ + age + I(age^2) + restaurn, 
   data = wooldridge::smoke,
   weights = weights
 )
 summary(fgls_smoke)
+```
+
+4. In der Vorlesung haben Sie den FD-Schätzer anhand von Kriminalitätsdaten aus den USA kennengelernt. Bitte beschreiben Sie dessen Vorteile gegenüber der normalen OLS Schätzung.
+
+\comment{
+In der Vorlesung wurde ein Datensatz zur Kriminalität in 46 US Städten in 1982 und 1987 vorgestellt. Wir haben ein lineares Querschnittsmodell angepasst und mit OLS geschätzt. Das Ergebnis war, dass eine steigende Arbeitslosenquote mit einer geringeren Kriminalitätsrate einhergeht. Das ist unerwartet. Wir haben uns überlegt, dass der Grund für dieses paradoxe Ergebnis das Fehlen wichtiger aber unbeobachteter Einflussfaktoren ist. Um diese mit in das Modell aufzunehmen, haben wir städtespezifische Konstanten (sogenannte fixe Effekte) $a_i$ ergänzt. Diese lassen sich aber nicht gut schätzen, wenn nur Daten aus zwei Jahren vorliegen. Hier hat der Trick mit Differenzen geholfen: Bilden wir Differenzen der Beobachtungen der beiden Jahre, so werden die fixen Effekte eliminiert und müssen nicht modelliert werden. Dies ergibt ein Modell, das mittels OLS geschätzt werden kann. Dieser Trick funktioniert ähnlich auch mit mehr als zwei Zeitpunkten.
+}
+
+```{r, Aufgabe 4}
+crime <- lm(
+  formula = crmrte ~ unem,
+  data = wooldridge::crime2,
+  subset = year == 87
+)
+coef(crime)
+
+crime_fd <- lm(
+  formula = ccrmrte ~ cunem,
+  data = wooldridge::crime2
+)
+coef(crime_fd)
+```
+
+5. Angenommen, wir möchten die Auswirkungen mehrerer Variablen auf das jährliche Sparen schätzen und wir verfügen über Paneldaten von Einzelpersonen, die heute und vor genau zwei Jahr erhoben wurden. Wenn wir eine Jahres-Dummy-Variable für 2023 einbeziehen und die Methode der ersten Differenzen verwenden, können wir dann auch das Alter im ursprünglichen Modell aufnehmen? 
+
+\comment{
+Nein, denn dann würde im Differenzenmodell perfekte Multikollinearität herrschen: Die Differenz aus der Dummy-Variable ergibt stets 1, die Differenz aus der Altersvariable stets 2.
+}
+
+6. Bitte schätzen Sie mit dem FD-Schätzer das Modell
+\begin{equation*} 
+\hspace{-1cm} \log\texttt{rent}_{it} = \beta_0 + \delta_0 \texttt{y90}_t + \beta_1 \log\texttt{pop}_{it} + \beta_2 \log\texttt{avginc}_{it} + \beta_3 \texttt{pctstu}_{it} + a_i + u_{it}
+\end{equation*}
+mit dem Datensatz `wooldridge::rental`.
+
+```{r, Aufgabe 6}
+rental <- wooldridge::rental
+
+### Bildung der Differenzen
+fd_lrent <- rental$lrent[rental$year == 90] - rental$lrent[rental$year == 80]
+fd_lpop <- rental$lpop[rental$year == 90] - rental$lpop[rental$year == 80]
+fd_lavginc <- rental$lavginc[rental$year == 90] - rental$lavginc[rental$year == 80]
+fd_pctstu <- rental$pctstu[rental$year == 90] - rental$pctstu[rental$year == 80]
+
+### Schätzung
+ols_rental_fd <- lm(formula = fd_lrent ~ fd_lpop + fd_lavginc + fd_pctstu)
+summary(ols_rental_fd)
 ```
