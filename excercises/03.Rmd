@@ -20,18 +20,69 @@ knitr::opts_chunk$set(
 
 ## Überblick
 
-...
+Wir haben mit den *fixen (fixed, FE)* und *zufälligen (random, RE) Effekten (effects)* zwei neue Panelmethoden kennengelernt, zusätzlich zu der *erste Differenz (first difference, FD)* Methode. 
+
+\onehalfspacing
+
+Bei der FE Schätzung werden zunächst die Daten transformiert, indem \luecke{jeweils das zeitliche Mittel abgezogen wird}.
+
+\singlespacing
 
 ## Aufgaben
 
-1. Aufgabe
+1. Uns liegen mit der Datei `unfaelle.csv` (siehe Moodle) Daten vor über die Anzahl der bei Autounfällen tödlich Verunglückten in den USA. Wir werden die Anzahl der Todesfälle pro 10.000 Einwohner untersuchen, das ist die Variable `tote_p10k` im Datensatz. Bitte lesen Sie die Daten ein und verschaffen sich zunächst einen Überblick.
 
 ```{r, Aufgabe 1}
-# Code
+unfaelle <- read.csv("unfaelle.csv")
+str(unfaelle)
 ```
 
 \comment{
-Lösung
-\end{itemize}
+Die Struktur in den Daten ist so, dass zunächst alle 7 Beobachtungen für den ersten Staat "AL" (Alabama) chronologisch aufgeführt sind (1982-1988), anschließend die für den zweiten Staat, usw. Es handelt sich um einen balanzierten Paneldatensatz, bei dem die Zeitdimension für jeden Merkmalsträger gleich groß ist.
 }
 
+2. Schätzen Sie das Modell
+\begin{align}
+\label{mod}
+\texttt{tote\_p10k} = \beta_0 + \beta_1 \texttt{biersteuer} + u
+\end{align}
+für die Jahre 1982 und 1988, einmal mit pooled OLS und einmal mit dem FD Schätzer.^[*Tipp:* Die FD Schätzung kann mittels der `lm()` Funktion berechnet werden. Dafür müssen wir aber vorher händisch die Datendifferenzen bilden. Die Funktion `plm::plm()` tut dies automatisch für uns und kann auch unsere anderen Panelmethoden bearbeiten (`plm` steht für linear models for panel data).] Interpretieren Sie jeweils $\hat\beta_1$ und die auftretenden Unterschiede.
+
+```{r, Aufgabe 2}
+pooled <- lm(
+  formula = tote_p10k ~ biersteuer,
+  data = unfaelle,
+  subset = (jahr %in% c(1982, 1988))
+)
+summary(pooled)
+
+# install.packages("plm")
+library("plm")
+
+fd <- plm(
+  formula = tote_p10k ~ biersteuer,
+  model = "fd",
+  data = unfaelle,
+  subset = (jahr %in% c(1982, 1988))
+)
+summary(fd)
+```
+
+\comment{
+Der geschätzte Parameter $\hat\beta_1$ erklärt, wie sich die durchschnittliche Anzahl Verkehrstoter ändert, wenn die Biersteuer um 1 USD erhöht wird. Überraschenderweise ist der Schätzwert im gepoolten Modell positiv. Über die Bildung der Differenzen haben wir den Effekt der unbeobachteten Heterogenität (zum Beispiel soziale Akzeptanz von Fahren unter Alkohol) kontrolliert. Damit verschwindet die Verzerrung des KQ-Schätzers, die auf die Nichtberücksichtigung dieses Effekts zurückgeht. Im FD Modell ist $\hat\beta_1$ (wie erwartet) negativ.
+}
+
+3. Wir erweitern das Modell \eqref{mod} um die Arbeitslosenquote des Staates `alo` in Prozentpunkten, das logarithmierte durchschnittliche Pro-Kopf-Einkommen `lpkopf_einkom` in USD sowie eine Variable für das Alter, ab dem Alkohol legal konsumiert werden darf, `alk_alter`. Bitte führen Sie die FD-Schätzung durch, die alle Jahre 1982 bis 1988 berücksichtigt.
+
+```{r, Aufgabe 3}
+fd_extended <- plm(
+  formula = tote_p10k ~ biersteuer + alo + lpkopf_einkom + alk_alter,
+  model = "fd",
+  data = unfaelle
+)
+summary(fd_extended)
+```
+
+\comment{
+Die Nichtberücksichtigung zeitlich unterschiedlicher Konstanten ist hier problematisch: Niveauunterschiede auf Basis bundesweiter neuer Gesetze (zum Beispiel eine Gurtpflicht) werden von uns noch nicht berücksichtigt.
+}
