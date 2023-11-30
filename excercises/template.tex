@@ -157,7 +157,6 @@ rmargin=35mm
 
 \usepackage{fancyhdr}
 \usepackage{lastpage} % to get the total page number
-\usepackage{setspace}
 
 $if(listings)$
 \usepackage{listings}
@@ -366,16 +365,6 @@ $endif$
 \end{flushright}
 
 \begin{center} \textbf{\large{$title$}} \end{center}
-
-$if(solution)$
-\definecolor{lueckecolor}{rgb}{0.1, 0.6, 0.1}
-$else$
-\definecolor{lueckecolor}{rgb}{1, 1, 1}
-$endif$
-
-\newcommand{\luecke}[1]{
-  {\large \underline{\textcolor{lueckecolor}{~#1~}}}
-}
 
 $if(solution)$ \begin{center} \textit{Lösungen} \end{center} $else$ $endif$
 

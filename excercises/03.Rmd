@@ -20,35 +20,47 @@ knitr::opts_chunk$set(
 
 ## Überblick
 
-Wir haben mit den *fixen (fixed, FE)* und *zufälligen (random, RE) Effekten (effects)* zwei neue Panelmethoden kennengelernt, zusätzlich zu der *erste Differenz (first difference, FD)* Methode. 
-
-\onehalfspacing
-
-Bei der FE Schätzung werden zunächst die Daten transformiert, indem \luecke{jeweils das zeitliche Mittel abgezogen wird}.
-
-\singlespacing
+Wir haben mit den *fixen (fixed, FE)* und *zufälligen (random, RE) Effekten (effects)* zwei neue Panelmethoden kennengelernt, zusätzlich zu der *erste Differenz (first difference, FD)* Methode. Die Motivation ist die gleiche: Wir vermuten, dass unbeobachtete Einflussfaktoren existieren, die entweder konstant über die Zeit sind (die so genannten fixen Effekte $a_i$) oder über die Zeit variieren (die so genannten *idiosynkratischen* Fehler $u_{it}$). Wenn wir nun ein Modell mittels pooled OLS anpassen, müssten wir annehmen, dass beide Typen unkorreliert mit den beobachteten Regressoren sind. Zumindest für die $a_i$ ist das oft unrealistisch und würde dann zu einer verzerrten Schätzung führen. Hier setzen die Panelmethoden an, die (unter unterschiedlichen Voraussetzungen) effiziente Schätzung ermöglichen.
 
 ## Aufgaben
 
-1. Uns liegen mit der Datei `unfaelle.csv` (siehe Moodle) Daten vor über die Anzahl der bei Autounfällen tödlich Verunglückten in den USA. Wir werden die Anzahl der Todesfälle pro 10.000 Einwohner untersuchen, das ist die Variable `tote_p10k` im Datensatz. Bitte lesen Sie die Daten ein und verschaffen sich zunächst einen Überblick.
+1. Warum geben wir uns mit der FD Methode noch nicht zufrieden?
 
-```{r, Aufgabe 1}
+\comment{
+Damit der FD-Schätzer optimal ist, muss insbesondere die Annahme $\text{Cov}(\Delta u_{i,t}, \Delta u_{i,s}\mid X_i) = 0$ gelten. Das ist eine sehr spezielle Annahme, die oft gar nicht erfüllt ist. Wenn die Annahme verletzt ist, gibt es andere Schätzer, die eine kleinere Varianz besitzen.
+}
+
+2. Was ist die Idee der *Within Transformation* und wie funktioniert sie?
+
+\comment{
+Wir subtrahieren von den Regressoren $X_{i,t}$ und der abhängigen Variable $y_{i,t}$ jeweils das zeitliche Mittel. Dadurch werden die fixen Effekte $a_i$ eliminiert und wir können die bewährte KQ-Schätzung durchführen. Dieses Verfahren heißt \textit{within transformation}, oder auch \textit{fixed effects estimator}, oder \textit{least-squares dummy variable (LSDV) estimator}.
+}
+
+3. Bitte vergleichen Sie die Methoden FE und FD miteinander; wann bevorzugen Sie welche?
+
+\comment{
+Bei $T = 2$ sind beide Methoden äquivalent. Auch sind ihre ersten vier Annahmen FD.1 - 4 und FE.1 - 4 jeweils identisch; genau dann, wenn die eine Methode unverzerrt ist, ist also auch die andere Methode unverzerrt. Die anderen Voraussetzungen zeigen aber an, in welcher Situation welche Methode effizienter ist. Wenn der Fehler $u_{i,t}$ unkorreliert über die Zeit ist, ist FD.6 verletzt und FE effizienter. Umgekehrt, wenn $u_{i,t}$ zum Beispiel ein random walk ist, dann ist $\Delta u_{i,t}$ unkorreliert über die Zeit unkorreliert und FD ist der BLUS.
+}
+
+4. Uns liegen mit der Datei `unfaelle.csv` (siehe Moodle) Daten über die Anzahl der bei Autounfällen tödlich Verunglückten in den USA vor. Wir werden im Folgenden die Anzahl der Todesfälle pro 10.000 Einwohner untersuchen, das ist die Variable `tote_p10k` im Datensatz. Bitte lesen Sie die Daten ein und verschaffen Sie sich einen Überblick.
+
+```{r, Aufgabe 4}
 unfaelle <- read.csv("unfaelle.csv")
 str(unfaelle)
 ```
 
 \comment{
-Die Struktur in den Daten ist so, dass zunächst alle 7 Beobachtungen für den ersten Staat "AL" (Alabama) chronologisch aufgeführt sind (1982-1988), anschließend die für den zweiten Staat, usw. Es handelt sich um einen balanzierten Paneldatensatz, bei dem die Zeitdimension für jeden Merkmalsträger gleich groß ist.
+Es handelt sich um einen \textit{balanzierten} Paneldatensatz, bei dem die Zeitdimension $T$ für jeden Merkmalsträger (hier die Staaten) gleich groß ist.
 }
 
-2. Schätzen Sie das Modell
+5. Schätzen Sie das Modell
 \begin{align}
 \label{mod}
 \texttt{tote\_p10k} = \beta_0 + \beta_1 \texttt{biersteuer} + u
 \end{align}
-für die Jahre 1982 und 1988, einmal mit pooled OLS und einmal mit dem FD Schätzer.^[*Tipp:* Die FD Schätzung kann mittels der `lm()` Funktion berechnet werden. Dafür müssen wir aber vorher händisch die Datendifferenzen bilden. Die Funktion `plm::plm()` tut dies automatisch für uns und kann auch unsere anderen Panelmethoden bearbeiten (`plm` steht für linear models for panel data).] Interpretieren Sie jeweils $\hat\beta_1$ und die auftretenden Unterschiede.
+für die Jahre 1982 und 1988, einmal mit pooled OLS und einmal mit dem FD Schätzer.^[*Tipp:* Die FD Schätzung kann mittels der `lm()` Funktion berechnet werden. Dafür müssen wir aber vorher händisch die Datendifferenzen bilden. Die Funktion `plm::plm()` tut dies automatisch für uns und kann auch unsere anderen Panelmethoden FE und RE bearbeiten (`plm` steht für linear models for panel data).] Interpretieren Sie jeweils $\hat\beta_1$ und die auftretenden Unterschiede.
 
-```{r, Aufgabe 2}
+```{r, Aufgabe 5}
 pooled <- lm(
   formula = tote_p10k ~ biersteuer,
   data = unfaelle,
@@ -72,17 +84,36 @@ summary(fd)
 Der geschätzte Parameter $\hat\beta_1$ erklärt, wie sich die durchschnittliche Anzahl Verkehrstoter ändert, wenn die Biersteuer um 1 USD erhöht wird. Überraschenderweise ist der Schätzwert im gepoolten Modell positiv. Über die Bildung der Differenzen haben wir den Effekt der unbeobachteten Heterogenität (zum Beispiel soziale Akzeptanz von Fahren unter Alkohol) kontrolliert. Damit verschwindet die Verzerrung des KQ-Schätzers, die auf die Nichtberücksichtigung dieses Effekts zurückgeht. Im FD Modell ist $\hat\beta_1$ (wie erwartet) negativ.
 }
 
-3. Wir erweitern das Modell \eqref{mod} um die Arbeitslosenquote des Staates `alo` in Prozentpunkten, das logarithmierte durchschnittliche Pro-Kopf-Einkommen `lpkopf_einkom` in USD sowie eine Variable für das Alter, ab dem Alkohol legal konsumiert werden darf, `alk_alter`. Bitte führen Sie die FD-Schätzung durch, die alle Jahre 1982 bis 1988 berücksichtigt.
+6. Wir erweitern das Modell \eqref{mod} um die Arbeitslosenquote des Staates `alo` in Prozentpunkten, das logarithmierte durchschnittliche Pro-Kopf-Einkommen `lpkopf_einkom` in USD sowie eine Variable für das Alter, ab dem Alkohol legal konsumiert werden darf, `alk_alter`. Bitte führen Sie die FE-Schätzung durch, die alle Jahre 1982 bis 1988 berücksichtigt.
 
-```{r, Aufgabe 3}
-fd_extended <- plm(
+```{r, Aufgabe 6}
+within <- plm(
   formula = tote_p10k ~ biersteuer + alo + lpkopf_einkom + alk_alter,
-  model = "fd",
+  model = "within",
   data = unfaelle
 )
-summary(fd_extended)
+summary(within)
 ```
 
+7. Welche Vorteile hat RE gegenüber FE, und wo liegen die Nachteile?
+
 \comment{
-Die Nichtberücksichtigung zeitlich unterschiedlicher Konstanten ist hier problematisch: Niveauunterschiede auf Basis bundesweiter neuer Gesetze (zum Beispiel eine Gurtpflicht) werden von uns noch nicht berücksichtigt.
+Der RE Schätzer erlaubt Regressoren, die konstant über die Zeit sind. Das war bei FD und FE nicht möglich. Für die RE Schätzung ist die zentrale Annahme, dass $\text{Cov}(X_{i,t}, a_i) = 0$ gilt; nur in diesem Fall führt die Methode zu einer unverzerrten Schätzung. Wenn diese Annahme nicht erfüllt ist (und das ist kein unwahrscheinlicher Fall), dann sollte auf FD oder FE zurückgegriffen werden. Zentral bei der RE Methode ist die Schätzung der Konstanten $$\theta = 1 - \frac{\sigma_u}{\sqrt{\sigma_u^2 + T \sigma_a^2}} \in [0,1],$$ wobei $\sigma_u$ die Standardabweichung des Fehlers, $\sigma_a$ die Standardabweichung des fixen Effekts und $T$ die Paneldimension bezeichnet. Wie genau $\theta$ geschätzt werden kann, wird in der Vorlesung beschrieben. In einem nächsten Schritt wird (wie bei der FE Methode) von den Daten das zeitliche Mittel subtrahiert, welches (und das ist der entscheidende Unterschied) vorher mit $\theta$ gewichtet wird. Dann sind die Fehler unkorreliert und es kann OLS verwendet werden. Es gibt zwei Spezialfälle:
+\begin{itemize}
+  \item Wenn $\theta \approx 0$, dann entspricht RE dem pooled OLS. Das ist zum Beispiel der Fall, wenn $\sigma_u$ viel größer als $\sigma_a$ ist.
+  \item Wenn $\theta \approx 1$, dann entspricht RE dem FE. Das ist zum Beispiel der Fall, wenn $\sigma_a$ viel größer als $\sigma_u$ ist oder wenn $T \to \infty$.
+\end{itemize}
+In der Vorlesung wird ein Testverfahren beschrieben, mit dem man zwischen fixen, zufälligen und nicht-existenten unbeobachteten Effekten unterscheiden kann (siehe dazu auch die Funktion \texttt{plm::plmtest()}).
 }
+
+8. Schätzen Sie das Modell aus Aufgabe 6 erneut mit RE.
+
+```{r, Aufgabe 8}
+random <- plm(
+  formula = tote_p10k ~ biersteuer + alo + lpkopf_einkom + alk_alter,
+  model = "random",
+  data = unfaelle
+)
+summary(random)
+```
+
