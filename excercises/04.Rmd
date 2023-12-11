@@ -20,18 +20,110 @@ knitr::opts_chunk$set(
 
 ## Überblick
 
-...
+Wir wissen bereits, dass die KQ-Schätzung verzerrt ist, sofern wichtige Einflussgrößen in der Modellgleichung nicht bedacht werden. Für Panel Daten haben wir zuletzt mit dem FD- und dem FE-Schätzer zwei Verfahren für unbeobachtete, zeitkonstante Effekte kennengelernt. Beide Methoden helfen uns aber nicht, wenn nur Querschnittsdaten vorliegen oder wir uns für den Effekt einer zeitkonstanten Variable interessieren. Die *Instrumental Variables Schätzung* ist ein anderes Verfahren, um diesem Problem zu begegnen.
+
+Und dann lernen wir mit *binären Wahlmodellen* eine neue Modellklasse kennen, bei der die abhängige Variable nicht mehr stetig, sondern binär ist.
+
 
 ## Aufgaben
 
-1. Aufgabe
-
-```{r, Aufgabe 1}
-# Code
-```
+1. Welches Problem entsteht, falls ein Regressor mit dem Fehler korreliert?
 
 \comment{
-Lösung
+In der Regressionsgleichung $y = \beta_0 + \beta_1 x + u$, falls $\text{Cov}(x,u)\neq 0$ gilt, ist MLR.4 (also die Annahme $\text{E}(u\mid x) = 0$) verletzt und der KQ-Schätzer ist verzerrt ($\text{E}(\hat\beta_1) \neq \beta_1$).
+}
+
+2. Was ist eine Instrumentenvariable? Fällt Ihnen ein Beispiel ein?
+
+\comment{
+Statt $x$ wollen wir eine andere Variable $z$ verwenden (eine sogenannte Instrumentenvariable), die das gleiche Merkmal wie $x$ misst, allerdings mit $u$ unkorreliert ist. Zwei Voraussetzungen stellen wir an $z$:
+\begin{enumerate}
+  \item Exogenität: $\text{Cov}(z,u) = 0$ (das kann im Allgemeinen nicht getestet werden, man verlässt sich hier zum Beispiel auf ökonomisches Fachwissen)
+  \item Relevanz: $\text{Cov}(z,x)\neq 0$ (das kann sehr einfach getestet werden, siehe unten)
+\end{enumerate}
+Ein Beispiel: Wollen wir das Gehalt durch die Bildung erklären, können wir uns überlegen, dass Talent wohl auch einen Einfluss hat, aber nicht beobachtet wird und deshalb im Fehler verborgen ist. Falls nun Bildung und Talent korrelieren (wahrscheinlich ist das so), so wäre die Schätzung verzerrt. Stattdessen können wir uns eine Instrumentenvariable überlegen, die
+\begin{enumerate}
+  \item exogen ist (unkorreliert mit Talent) und
+  \item relevant ist (korreliert mit Bildung).
+\end{enumerate}
+Was könnte eine solche Variable sein?
+\begin{itemize}
+  \item "Kreditkartennummer" ist exogen, aber nicht relevant
+  \item "Intelligenzquotient" ist relevant, aber nicht exogen
+  \item "Bildung der Eltern" könnte beides erfüllen
 \end{itemize}
 }
 
+3. Betrachten Sie das lineare Modell
+\begin{align}
+\label{eq:model}
+y = \beta_0 + \beta_1 x + u.
+\end{align}
+Angenommen, $z$ ist eine geeignete Instrumentenvariable. Leiten Sie bitte $\beta_1^\text{IV}$ her.
+
+\comment{
+Es gilt $$\text{Cov}(z,y) = \text{Cov}(z, \beta_0 + \beta_1x + u) = \beta_1\text{Cov}(z,x) + \text{Cov}(z,u).$$
+Wenn nun $\text{Cov}(z,x) \neq 0$ (entspricht der obigen Annahme 2) und $\text{Cov}(z,u) = 0$ (entspricht Annahme 1), dann ist $\beta_1 = \text{Cov}(z,y) / \text{Cov}(z,x)$. Der Schätzer $\beta_1^\text{IV}$ ergibt sich, in dem man die Populationskovarianzen und die Stichprobenkovarianzen ersetzt: $$\beta_1^\text{IV} = \frac{\frac{1}{n-1}\sum_{i=1}^n (z_i - \bar{z})(y_i - \bar{y})}{\frac{1}{n-1}\sum_{i=1}^n (z_i - \bar{z})(x_i - \bar{x})} = \frac{\sum_{i=1}^n (z_i - \bar{z})y_i}{\sum_{i=1}^n (z_i - \bar{z})x_i}$$
+}
+
+4. Simulieren Sie bitte Daten wie nachfolgend angegeben und schätzen Sie dann Modell \eqref{eq:model}, einmal per KQ-Methode und einmal mit der IV-Methode.
+
+```
+set.seed(1)
+Sigma <- matrix(c(1, 0.7, 0.5, 0.7, 1, 0, 0.5, 0, 1), nrow = 3)
+data <- MASS::mvrnorm(n = 100, mu = c(0, 0, 0), Sigma = Sigma)
+data <- as.data.frame(data)
+colnames(data) <- c("x", "z", "u")
+beta_0 <- 1
+beta_1 <- 2
+data$y <- beta_0 + data$x * beta_1 + data$u
+```
+
+```{r, Aufgabe 4 Datensimulation, include = FALSE}
+set.seed(1)
+Sigma <- matrix(c(1, 0.7, 0.5, 0.7, 1, 0, 0.5, 0, 1), nrow = 3)
+data <- MASS::mvrnorm(n = 100, mu = c(0, 0, 0), Sigma = Sigma)
+data <- as.data.frame(data)
+colnames(data) <- c("x", "z", "u")
+beta_0 <- 1
+beta_1 <- 2
+data$y <- beta_0 + data$x * beta_1 + data$u
+```
+
+```{r, Aufgabe 4}
+kq <- lm(y ~ x, data = data)
+coef(kq)
+
+(beta_1_iv <- cov(data$z, data$y) / cov(data$z, data$x))
+(beta_0_iv <- mean(data$y) - beta_1_iv * mean(data$x))
+```
+
+5. Schätzen Sie Modell \eqref{eq:model} auch mit 2SLS (Two Stage Least Squares) und reproduzieren Sie Ihr Ergebnis mit `AER::ivreg`.
+
+```{r, Aufgabe 5}
+### 2SLS
+mod_first_stage <- lm(x ~ z, data = data)
+summary(mod_first_stage) # z ist ein relevantes Instrument
+fitted_x <- fitted(mod_first_stage)
+mod_second_stage <- lm(y ~ fitted_x, data = data)
+coef(mod_second_stage)
+
+### mit der Paketfunktion
+mod_iv <- AER::ivreg(y ~ x | z, data = data)
+coef(mod_iv)
+```
+
+6. Angenommen, $y$ in Modell \eqref{eq:model} ist nun binär. Welche der Annahmen im klassischen linearen Regressionsmodells gelten dann nicht mehr?
+
+\comment{
+\begin{itemize}
+  \item MLR.1-4 können weiterhin erfüllt sein
+  \item MLR.5 und MLR.6 gelten nicht mehr (siehe Vorlesung)
+\end{itemize}
+}
+
+7. Welche neue Interpretation bekäme $\hat\beta_1$? 
+
+\comment{
+Verändert sich $x$, so verändert sich nicht der (relative) Wert von $y$, sondern die \textbf{Wahrscheinlichkeit}, dass $y = 1$ eintritt.
+}
