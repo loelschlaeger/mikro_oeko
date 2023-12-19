@@ -889,6 +889,19 @@
       ],
       "Hash": "df58958f293b166e4ab885ebcad90e02"
     },
+    "pROC": {
+      "Package": "pROC",
+      "Version": "1.18.5",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R",
+        "Rcpp",
+        "methods",
+        "plyr"
+      ],
+      "Hash": "82d32ebd548c6a4e7de73bab96411b3b"
+    },
     "pbkrtest": {
       "Package": "pbkrtest",
       "Version": "0.5.2",
@@ -994,6 +1007,17 @@
         "zoo"
       ],
       "Hash": "fcffefb3f8bf59211bbb05394c454785"
+    },
+    "plyr": {
+      "Package": "plyr",
+      "Version": "1.8.9",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R",
+        "Rcpp"
+      ],
+      "Hash": "6b8177fd19982f0020743fadbfdbd933"
     },
     "praise": {
       "Package": "praise",

@@ -24,14 +24,78 @@ knitr::opts_chunk$set(
 
 ## Aufgaben
 
-1. Aufgabe
+1. Simulieren Sie Daten wie nachfolgend angegeben und schätzen Sie die Probit-Modelle
+\begin{align}
+\label{eq:model1}
+y &= \beta_0 + \beta_1 x_1 + u \\
+\label{eq:model2}
+y &= \beta_0 + \beta_1 x_1 + \beta_2 x_2 + u
+\end{align}
 
-```{r, Aufgabe 1}
-# Code
+```
+set.seed(1)
+data <- MASS::mvrnorm(n = 50, mu = c(0, 0, 0), Sigma = diag(3))
+data <- as.data.frame(data)
+colnames(data) <- c("x_1", "x_2", "u")
+beta_0 <- 1
+beta_1 <- 0.2
+beta_2 <- -0.5
+y <- beta_0 + data$x_1 * beta_1 + data$x_2 * beta_2 + data$u
+data$y <- ifelse(y >= 0.5, 1, 0)
+```
+
+```{r, Aufgabe 1, include = FALSE}
+set.seed(1)
+data <- MASS::mvrnorm(n = 50, mu = c(0, 0, 0), Sigma = diag(3))
+data <- as.data.frame(data)
+colnames(data) <- c("x_1", "x_2", "u")
+beta_0 <- 1
+beta_1 <- 0.2
+beta_2 <- -0.5
+y <- beta_0 + data$x_1 * beta_1 + data$x_2 * beta_2 + data$u
+data$y <- ifelse(y >= 0.5, 1, 0)
+
+mod1 <- glm(y ~ x_1, data = data, family = binomial(link = "probit"))
+mod2 <- glm(y ~ x_1 + x_2, data = data, family = binomial(link = "probit"))
+```
+
+2. Welches der Modelle \eqref{eq:model1} und \eqref{eq:model2} hat die "bessere" Null Deviance oder Residual Deviance?
+
+
+```{r, Aufgabe 2}
+data.frame(
+  "null.deviance" = c(mod1$null.deviance, mod2$null.deviance),
+  "residual.deviance" = c(mod1$deviance, mod2$deviance),
+  row.names = c("model 1", "model 2")
+)
 ```
 
 \comment{
-Lösung
-\end{itemize}
+Je kleiner die Deviance, desto besser beschreibt das Modell die Daten. Die Null Deviance der Modelle ist identisch, denn ohne Regressoren sind beide Modelle identisch. Die Residual Deviance von Modell \eqref{eq:model2} ist kleiner als die von Modell \eqref{eq:model1}, also erklärt Modell \eqref{eq:model2} die Variable $y$ besser als das Modell \eqref{eq:model1}.
 }
+
+3. Bitte testen Sie für beide Modelle die Hypothese $H_0 \colon \beta_k = 0, k = 1,\dots,K$ zu $\alpha = 10\%$.
+
+\comment{
+Diese Hypothese lässt sich mit der Teststatistik "Null Deviance minus Residual Deviance" testen, die unter der Nullhypothese Chi-Quadrat verteilt ist mit $K$ Freiheitsgraden. Sofern der Wert der Teststatistik größer ist als das $1-\alpha = 90\%$ Quantil der Chi-Quadrat Verteilung mit $K$ Freiheitsgraden, wird die Nullhypothese verworfen.
+}
+
+```{r, Aufgabe 3}
+# Modell 1: H_0 kann nicht verworfen werden
+mod1$null.deviance - mod1$deviance > qchisq(p = 0.9, df = 1) 
+
+# Modell 2: Verwerfe H_0
+mod2$null.deviance - mod2$deviance > qchisq(p = 0.9, df = 2)
+```
+
+4. Zeichen Sie für beide Modelle eine ROC Kurve mit der Funktion `pROC::roc()`.
+
+```{r, Aufgabe 4, results = 'hide'}
+pROC::roc(
+  data$y, pnorm(predict(mod1)), plot = "TRUE", col = "red", quiet = TRUE
+)
+pROC::roc(
+  data$y, pnorm(predict(mod2)), plot = "TRUE", add = TRUE, col = "blue", quiet = TRUE
+)
+```
 
