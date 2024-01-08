@@ -127,6 +127,7 @@ $endif$
 \IfFileExists{microtype.sty}{% use microtype if available
   \usepackage[$for(microtypeoptions)$$microtypeoptions$$sep$,$endfor$]{microtype}
   \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+  \microtypesetup{nopatch=item}
 }{}
 $if(indent)$
 $else$
