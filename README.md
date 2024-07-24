@@ -1,4 +1,4 @@
-# Materials for course "Einführung Mikroökonometrie" (in German)
+# Materials for course "Einführung Mikroökonometrie" 
 
 :teacher: Dietmar Bauer (lecture), Lennart Oelschläger (tutorial)
 
@@ -18,7 +18,7 @@
 ### Schedule
 
 |   Week   |     Content                                    |
-|----------|------------------------------------------------|
+|---------:|:-----------------------------------------------|
 |     1    |     Einleitung                                 |
 |     2    |     Grundlagen                                 |
 |     3    |     Lineare Modelle                            |
