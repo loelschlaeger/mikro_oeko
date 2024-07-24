@@ -1,36 +1,38 @@
-# Materials for "Einführung Mikroökonometrie" lecture 
+# Materials for course "Einführung Mikroökonometrie" (in German)
 
-### References
+:teacher: Dietmar Bauer (lecture), Lennart Oelschläger (tutorial)
 
-Jeff Wooldridge: Introductory Econometrics (fifth edition), Cengage Learning, 2013.
+:date: winter term 2024/25
 
-1. lineare Modelle für gepoolte Querschnittsdaten (Chapter 13)
-2. Paneldatenmodelle (Chapter 14)
-3. Instrumental Variables Schätzung (Chapter 15)
-4. Modelle für diskrete Auswahl (qualitative Daten): binäre Auswahl (Section
-17.1)
-5. Modelle für Zähldaten (Section 17.3)
-6. Modelle für zensierte Daten (Section 17.2, 17.4)
+:books: Jeff Wooldridge: Introductory Econometrics (fifth edition), Cengage Learning, 2013.
+
+### Topics
+
+1. Lineare Modelle für gepoolte Querschnittsdaten 
+2. Paneldatenmodelle 
+3. Instrumental Variables Schätzung 
+4. Modelle für binäre Auswahl 
+5. Modelle für Zähldaten 
+6. Modelle für zensierte Daten
 
 ### Schedule
 
-|     Week      |     Content                                    |
-|---------------|------------------------------------------------|
-|     10.10.    |     Einleitung                                 |
-|     17.10.    |     Grundlagen                                 |
-|     24.10.    |     Lin. Modelle                               |
-|     31.10.    |     Pooling in lin. Modellen                   |
-|     7.11.     |     Paneldatenmodelle: oneway fixed effects    |
-|     14.11.    |     Oneway random effects                      |
-|     21.11.    |     Tests in Panels                            |
-|     28.11.    |     IV: Idee                                   |
-|     5.12.     |     IV: 2SLS                                   |
-|     12.12     |     Bin. Wahl: lin Modell                      |
-|     19.12.    |     Bin. Wahl: Logit                           |
-|     9.1.      |     Poissonregression                          |
-|     16.1.     |     Zensurierung: links und rechts             |
-|     23.1.     |     Zensurierung: missing data.                |
-|     30.1.     |     Ersatztermin.                              |
+|   Week   |     Content                                    |
+|----------|------------------------------------------------|
+|     1    |     Einleitung                                 |
+|     2    |     Grundlagen                                 |
+|     3    |     Lineare Modelle                            |
+|     4    |     Pooling in linearen Modellen               |
+|     5    |     Paneldatenmodelle: oneway fixed effects    |
+|     6    |     Oneway random effects                      |
+|     7    |     Tests in Panels                            |
+|     8    |     IV: Idee                                   |
+|     9    |     IV: 2SLS                                   |
+|    10    |     Binäre Wahl: lineares Modell               |
+|    11    |     Binäre Wahl: Logit und Probit              |
+|    12    |     Poissonregression                          |
+|    13    |     Zensurierung                               |
+|    14    |     Zensurierung: missing data                 |
 	
 	
 
