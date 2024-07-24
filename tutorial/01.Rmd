@@ -4,12 +4,12 @@ author: "Lennart Oelschläger"
 email: "lennart.oelschlaeger@uni-bielefeld.de"
 date: "`r format(Sys.Date(), format = '%d.%m.%Y')`"
 course: "310214 Praktische Übung zu \"Einführung in die Mikroökonometrie\""
-term: "Wintersemester 2023/2024"
+term: "Wintersemester 2024/2025"
 output: 
   pdf_document:
     template: template.tex
     highlight: null
-solution: false
+solution: true
 ---
 
 ```{r setup, include=FALSE}

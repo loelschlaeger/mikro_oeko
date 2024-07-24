@@ -17,9 +17,9 @@
 
 ### Schedule
 
-|   Week   |     Content                                    |
-|---------:|:-----------------------------------------------|
-|     1    |     Einleitung                                 |
+|   Week   |     Lecture Content                            | Tutorial |
+|---------:|:-----------------------------------------------|----------|
+|     1    |     Einleitung                                 |          
 |     2    |     Grundlagen                                 |
 |     3    |     Lineare Modelle                            |
 |     4    |     Pooling in linearen Modellen               |
