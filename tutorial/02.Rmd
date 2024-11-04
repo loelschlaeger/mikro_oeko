@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 \begin{equation} \label{modell}
 \hspace{-1cm} \texttt{cigs} = \beta_0 + \beta_1 \log(\texttt{income}) + \beta_2 \log(\texttt{cigpric}) + \beta_3 \texttt{educ} + \beta_4 \texttt{age} + \beta_5 \texttt{age}^2 + \beta_6 \texttt{restaurn} + u
 \end{equation}
-mit dem Datensatz `wooldridge::smoke` und interpretieren Sie die Koeffizienten.
+mit dem Datensatz `wooldridge::smoke` und interpretieren Sie die Koeffizienten im Sachzusammenhang. Welche Koeffizienten sind signifikant zu dem Niveau $\alpha = 5\%$?
 
 ```{r, Aufgabe 1}
 ols_smoke <- lm(
@@ -42,7 +42,7 @@ summary(ols_smoke)
 
 \comment{
 \begin{itemize}
-  \item $\beta_0$: durchschnittliche Anzahl gerauchter Zigaretten pro Tag für alle Regressoren gleich Null (ergibt hier keinen Sinn und ist nicht signifikant)
+  \item $\beta_0$: durchschnittliche Anzahl gerauchter Zigaretten pro Tag für alle Regressoren gleich Null (diese Interpretation ergibt hier keinen Sinn)
   \item $\beta_1$: für eine Erhöhung des Jahreseinkommens um $1\%$ impliziert das Modell eine Erhöhung der Anzahl durchschnittlich gerauchter Zigaretten pro Tag um approximativ $0.01$ Zigaretten, ceteris paribus (nicht signifikant).
   \item $\beta_2$: für eine Erhöhung des Packungspreises um $1\%$ impliziert das Modell eine Verminderung der Anzahl der durchschnittlich gerauchten Zigaretten pro Tag um $0.008$ Zigaretten, ceteris paribus (nicht signifikant).
   \item $\beta_3$: für ein weiteres Jahr Schulbildung impliziert das Modell eine Verminderung der Anzahl der durchschnittlich gerauchten Zigaretten pro Tag um eine halbe Zigarette, ceteris paribus.
@@ -51,12 +51,19 @@ summary(ols_smoke)
 \end{itemize}
 }
 
+Nur die Koeffizienten $\beta_3$, $\beta_4$, $\beta_5$ und $\beta_6$ sind signifikant zu dem Niveau $\alpha = 5\%$.
+
 2. Liegt in Modell \eqref{modell} Heteroskedastie vor?
 
 ```{r, Aufgabe 2}
+# visuelle Überprüfung hier schwieriger, da mehrere Regressoren involviert sind
+plot(wooldridge::smoke$lincome, residuals(ols_smoke)) 
+abline(h = 0)
+
 ols_smoke_white <- lm(
   formula = ols_smoke$residuals^2 ~ ols_smoke$fitted + I(ols_smoke$fitted^2)
 )
+
 summary(ols_smoke_white)
 ```
 
@@ -64,70 +71,68 @@ summary(ols_smoke_white)
 Der White-Test sagt ja!
 }
 
-3. Verwenden Sie statt OLS den FGLS-Schätzer um \eqref{modell} zu schätzen.
+3. Verwenden Sie statt OLS den FGLS-Schätzer um \eqref{modell} zu schätzen. Haben sich die Ergebnisse verändert?
 
 \comment{
-Vorgehensweise der FGLS-Schätzung wie in der Vorlesung beschrieben:
+Vorgehensweise der FGLS-Schätzung:
 \begin{enumerate}
-  \item schätze wie gewohnt mit OLS und speichere die Residuen $u$
-  \item berechne $\log(u^2)$
-  \item schätze wie gewohnt mit OLS das Modell $\log(u^2) = \gamma_0 + \gamma' X + v$
-  \item erhalte die angepassten Werte $\hat\gamma_0 + \hat\gamma' X$
-  \item berechne die Gewichte $1 / \exp(\hat\gamma_0 + \hat\gamma' X)$
-  \item berechne das Modell aus Schritt 1 erneut mit diesen Gewichten (zum Beispiel die Gewichte an das \texttt{weights} Argument der \texttt{lm()} Funktion übergeben)
+  \item schätze das Ursprungsmodell wie gewohnt mit OLS und speichere die Residuen $\hat u$
+  \item schätze das Modell erneut, verwende aber dieses mal $\log (\hat u^2)$ als abhängige Variable (Beachte: hier wird die Heteroskedastizität durch die Funktion $h(x) = \exp(X\beta)$ modelliert. Auch andere nicht-negative Funktionen $h(x)$ sind möglich, wie zum Beispiel $h(x) = (X\beta)^2$ so wie in der Vorlesung.)
+  \item erhalte die angepassten Werte $\hat g$ und berechne die Gewichte $1 / \exp(\hat g)$
+  \item schätze das Modell aus Schritt 1 erneut mit diesen Gewichten (zum Beispiel die Gewichte an das \texttt{weights} Argument der \texttt{lm()} Funktion übergeben)
 \end{enumerate}
 }
 
 ```{r, Aufgabe 3}
 ### Schritt 1
-u <- residuals(ols_smoke)
+u_hat <- residuals(ols_smoke)
 
 ### Schritt 2
-log_u_sq <- log(u^2)
-
-### Schritt 3
 model_helper <- lm(
-  formula = log_u_sq ~ lincome + lcigpric + educ + age + I(age^2) + restaurn,
+  formula = I(log(u_hat^2)) ~ lincome + lcigpric + educ + age + I(age^2) + restaurn,
   data = wooldridge::smoke
 )
 
-### Schritt 4
-fitted_values <- model.matrix(model_helper) %*% coefficients(model_helper)
-
-### Schritt 5
+### Schritt 3
+fitted_values <- fitted(model_helper)
 weights <- 1 / exp(fitted_values)
 
-### Schritt 6
+### Schritt 4
 fgls_smoke <- lm(
   formula = cigs ~ lincome + lcigpric + educ + age + I(age^2) + restaurn, 
   data = wooldridge::smoke,
   weights = weights
 )
 summary(fgls_smoke)
+
+### White-Test verwirft immer noch Homoskedastizität, jedoch ist der p-value gestiegen
+fgls_smoke_white <- lm(
+  formula = fgls_smoke$residuals^2 ~ fgls_smoke$fitted + I(fgls_smoke$fitted^2)
+)
+summary(fgls_smoke_white)
 ```
 
 4. In der Vorlesung haben Sie den FD-Schätzer anhand von Kriminalitätsdaten aus den USA kennengelernt. Bitte beschreiben Sie dessen Vorteile gegenüber der normalen OLS Schätzung.
 
 \comment{
-In der Vorlesung wurde ein Datensatz zur Kriminalität in 46 US Städten in 1982 und 1987 vorgestellt. Wir haben ein lineares Querschnittsmodell angepasst und mit OLS geschätzt. Das Ergebnis war, dass eine steigende Arbeitslosenquote mit einer geringeren Kriminalitätsrate einhergeht. Das ist unerwartet. Wir haben uns überlegt, dass der Grund für dieses paradoxe Ergebnis das Fehlen wichtiger aber unbeobachteter Einflussfaktoren ist. Um diese mit in das Modell aufzunehmen, haben wir städtespezifische Konstanten (sogenannte fixe Effekte) $a_i$ ergänzt. Diese lassen sich aber nicht gut schätzen, wenn nur Daten aus zwei Jahren vorliegen. Hier hat der Trick mit Differenzen geholfen: Bilden wir Differenzen der Beobachtungen der beiden Jahre, so werden die fixen Effekte eliminiert und müssen nicht modelliert werden. Dies ergibt ein Modell, das mittels OLS geschätzt werden kann. Dieser Trick funktioniert ähnlich auch mit mehr als zwei Zeitpunkten.
+In der Vorlesung wurde ein Datensatz zur Kriminalität in 46 US Städten in 1982 und 1987 vorgestellt. Es wurde ein lineares Querschnittsmodell angepasst und mit OLS geschätzt. Das Ergebnis war, dass eine steigende Arbeitslosenquote mit einer geringeren Kriminalitätsrate einhergeht. Das ist unerwartet. Wir haben uns überlegt, dass der Grund für dieses paradoxe Ergebnis das Fehlen wichtiger aber unbeobachteter Einflussfaktoren ist. Um diese mit in das Modell aufzunehmen, haben wir städtespezifische Konstanten (sogenannte fixe Effekte) $a_n$ für jede Stadt $n$ ergänzt. Diese lassen sich aber nicht gut schätzen, wenn nur Daten aus zwei Jahren vorliegen. Hier hat der Trick der Differenzenbildung geholfen: Bilden wir Differenzen der Beobachtungen der beiden Jahre, so werden die fixen Effekte eliminiert und müssen nicht modelliert werden. Dies ergibt ein Modell, das mittels OLS geschätzt werden kann. Dieser Trick funktioniert ähnlich auch mit mehr als zwei Zeitpunkten. Allerdings sind neue Annahmen zu beachten, insbesondere können keine Regressoren verwendet werden, die über die Zeit hinweg konstant sind.
 }
 
 ```{r, Aufgabe 4}
 crime <- lm(
   formula = crmrte ~ unem,
-  data = wooldridge::crime2,
-  subset = year == 87
+  data = wooldridge::crime2
 )
 coef(crime)
 
 crime_fd <- lm(
-  formula = ccrmrte ~ cunem,
+  formula = ccrmrte ~ cunem, # prefix "c" steht für "change"
   data = wooldridge::crime2
 )
 coef(crime_fd)
 ```
 
-5. Angenommen, wir möchten die Auswirkungen mehrerer Variablen auf das jährliche Sparen schätzen und wir verfügen über Paneldaten von Einzelpersonen, die heute und vor genau zwei Jahr erhoben wurden. Wenn wir eine Jahres-Dummy-Variable für 2023 einbeziehen und die Methode der ersten Differenzen verwenden, können wir dann auch das Alter im ursprünglichen Modell aufnehmen? 
+5. Angenommen, wir möchten die Auswirkungen mehrerer Variablen auf das jährliche Sparen schätzen und wir verfügen über Paneldaten von Einzelpersonen, die heute und vor genau zwei Jahr erhoben wurden. Wenn wir eine Jahres-Dummy-Variable für 2023 einbeziehen und die Methode der ersten Differenzen verwenden, können wir dann auch das Alter der Person im ursprünglichen Modell aufnehmen? 
 
 \comment{
 Nein, denn dann würde im Differenzenmodell perfekte Multikollinearität herrschen: Die Differenz aus der Dummy-Variable ergibt stets 1, die Differenz aus der Altersvariable stets 2.
@@ -142,7 +147,8 @@ mit dem Datensatz `wooldridge::rental`.
 ```{r, Aufgabe 6}
 rental <- wooldridge::rental
 
-### Bildung der Differenzen
+### Bildung der Differenzen 
+### (alternativ können die Variablen clrent, clpop, ... verwendet werden)
 fd_lrent <- rental$lrent[rental$year == 90] - rental$lrent[rental$year == 80]
 fd_lpop <- rental$lpop[rental$year == 90] - rental$lpop[rental$year == 80]
 fd_lavginc <- rental$lavginc[rental$year == 90] - rental$lavginc[rental$year == 80]
