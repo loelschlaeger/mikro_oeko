@@ -49,9 +49,9 @@ summary(ols_smoke)
   \item $\beta_4$ und $\beta_5$: der partielle Effekt ist $\beta_4 + 2\beta_5 \texttt{age}$, hält man also alle andere Variablen fix, so impliziert das Modell, dass ein um ein Jahr höheres Alter zu einer Veränderung der durchschnittlich gerauchten Zigaretten pro Tag in Höhe von approximativ $0.8 - 0.02 \times \texttt{age}$ führt.
   \item $\beta_6$: für eine Regulierung des Rauchens in Restaurants impliziert das Modell eine Verminderung der durchschnittlich gerauchten Zigaretten pro Tag in Höhe von knapp drei Zigaretten unter sonst gleichen Bedingungen.
 \end{itemize}
-}
 
 Nur die Koeffizienten $\beta_3$, $\beta_4$, $\beta_5$ und $\beta_6$ sind signifikant zu dem Niveau $\alpha = 5\%$.
+}
 
 2. Liegt in Modell \eqref{modell} Heteroskedastie vor?
 
@@ -138,11 +138,11 @@ coef(crime_fd)
 Nein, denn dann würde im Differenzenmodell perfekte Multikollinearität herrschen: Die Differenz aus der Dummy-Variable ergibt stets 1, die Differenz aus der Altersvariable stets 2.
 }
 
-6. Bitte schätzen Sie mit dem FD-Schätzer das Modell
-\begin{equation*} 
+6. Schätzen Sie mit dem FD-Schätzer das Modell
+\begin{equation} \label{modell-fd} 
 \hspace{-1cm} \log\texttt{rent}_{it} = \beta_0 + \delta_0 \texttt{y90}_t + \beta_1 \log\texttt{pop}_{it} + \beta_2 \log\texttt{avginc}_{it} + \beta_3 \texttt{pctstu}_{it} + a_i + u_{it}
-\end{equation*}
-mit dem Datensatz `wooldridge::rental`.
+\end{equation}
+mit dem Datensatz `wooldridge::rental` und interpretieren Sie die zu dem Niveau $\alpha = 5\%$ signifikanten Koeffizienten im Sachzusammenhang.
 
 ```{r, Aufgabe 6}
 rental <- wooldridge::rental
@@ -158,3 +158,12 @@ fd_pctstu <- rental$pctstu[rental$year == 90] - rental$pctstu[rental$year == 80]
 ols_rental_fd <- lm(formula = fd_lrent ~ fd_lpop + fd_lavginc + fd_pctstu)
 summary(ols_rental_fd)
 ```
+
+\comment{
+Basierend auf dem Output sind $\beta_0$, $\beta_2$ und $\beta_3$ signifikant zu dem Niveau $\alpha = 5\%$. Die Interpretation nach der Differenzenbildung ist analog zu der Interpretation im Ausgangsmodell \eqref{modell-fd}; zu beachten ist lediglich der Logarithmus:
+\begin{itemize}
+  \item Sofern alle erklärenden Variablen den Wert Null haben, beträgt der Grundwert der Miete $\exp(0.39)$ Dollar. Diese Interpretation ist hier nicht besonders hilfreich. 
+  \item Steigt das Pro-Kopf-Einkommen \texttt{avginc} ceteris paribus um $1\%$, so steigt die durchschnittliche Miete \texttt{rent} um $0.31\%$.
+  \item Steigt der prozentuale Anteil der Studenten an der Bevölkerung \texttt{pctstu} ceteris paribus um $1$ Prozentpunkt, so steigt die durchschnittliche Miete \texttt{rent} um $1.12\%$.
+\end{itemize}
+}
