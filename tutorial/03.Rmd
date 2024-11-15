@@ -39,7 +39,7 @@ Wir subtrahieren von den Regressoren $X_{i,t}$ und der abhängigen Variable $y_{
 3. Bitte vergleichen Sie die Methoden FE und FD miteinander; wann bevorzugen Sie welche?
 
 \comment{
-Bei $T = 2$ sind beide Methoden äquivalent. Auch sind ihre ersten vier Annahmen FD.1 - 4 und FE.1 - 4 jeweils identisch; genau dann, wenn die eine Methode unverzerrt ist, ist also auch die andere Methode unverzerrt. Die anderen Voraussetzungen zeigen aber an, in welcher Situation welche Methode effizienter ist. Wenn der Fehler $u_{i,t}$ unkorreliert über die Zeit ist, ist FD.6 verletzt und FE effizienter. Umgekehrt, wenn $u_{i,t}$ zum Beispiel ein random walk ist, dann ist $\Delta u_{i,t}$ unkorreliert über die Zeit unkorreliert und FD ist der BLUS.
+Bei $T = 2$ sind beide Methoden äquivalent. Auch sind ihre ersten vier Annahmen FD.1 - 4 und FE.1 - 4 jeweils identisch; genau dann, wenn die eine Methode unverzerrt ist, ist also auch die andere Methode unverzerrt. Die anderen Voraussetzungen zeigen aber an, in welcher Situation welche Methode effizienter ist. Wenn der Fehler $u_{i,t}$ unkorreliert über die Zeit ist, ist FD.6 verletzt und FE effizienter. Umgekehrt, wenn $u_{i,t}$ zum Beispiel ein random walk ist, dann ist $\Delta u_{i,t}$ über die Zeit unkorreliert und FD ist der BLUS.
 }
 
 4. Uns liegen mit der Datei `unfaelle.csv` (siehe Moodle) Daten über die Anzahl der bei Autounfällen tödlich Verunglückten in den USA vor. Wir werden im Folgenden die Anzahl der Todesfälle pro 10.000 Einwohner untersuchen, das ist die Variable `tote_p10k` im Datensatz. Bitte lesen Sie die Daten ein und verschaffen Sie sich einen Überblick.
