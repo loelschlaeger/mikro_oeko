@@ -22,7 +22,24 @@ knitr::opts_chunk$set(
 
 In einem *binären Wahlmodell* ist die abhängige Variable binär. Wir modellieren sie nicht direkt, sondern stattdessen die Wahrscheinlichkeit, dass sie den Wert $1$ annimmt (dass sie den Wert $0$ annimmt, folgt dann direkt aus der Gegenwahrscheinlichkeit). Lineare Modelle weisen hier Nachteile auf: Prognosen können negativ sein oder oberhalb von $1$ liegen und es liegt zwangsläufig Heteroskedastizität vor. Als bessere Alternative gibt es *Logit-* und *Probit-Modelle*, sie werden mit der Maximum-Likelihood Methode geschätzt. Mit *ROC* Kurven können die Klassifizierungsgüten verschiedener Modelle verglichen werden.
 
-Und dann schauen wir uns noch eine neue Datensituation an, nämlich dass die abhängige Variable eine *Zählvariable* ist. In diesem Fall können wir die *Poisson-Regression* verwenden, um Einflüsse zu quantifizieren.
+<!-- Und dann schauen wir uns noch eine neue Datensituation an, nämlich dass die abhängige Variable eine *Zählvariable* ist. In diesem Fall können wir die *Poisson-Regression* verwenden, um Einflüsse zu quantifizieren. -->
+
+## Fortsetzung Aufgabenblatt 4
+
+1. Angenommen, die abhängige Variable $y$ ist nun binär. Welche der Annahmen im klassischen linearen Regressionsmodells gelten dann nicht mehr?
+
+\comment{
+\begin{itemize}
+  \item MLR.1-4 können weiterhin erfüllt sein
+  \item MLR.5 und MLR.6 gelten nicht mehr (siehe Vorlesung)
+\end{itemize}
+}
+
+2. Welche neue Interpretation bekäme $\hat\beta_1$? 
+
+\comment{
+Verändert sich $x$, so verändert sich nicht der (relative) Wert von $y$, sondern die \textbf{Wahrscheinlichkeit}, dass $y = 1$ eintritt. Jedoch sind die Änderungen nicht mehr linear, sodass eine gewohnte ceteris paribus nicht möglich ist und wir andere Methoden (APE, PEA, etc.) benötigen.
+}
 
 ## Aufgaben
 
@@ -108,36 +125,36 @@ pROC::roc(
 Die blaue Kurve liegt oberhalb der roten Kurve, daher hat das Modell 2 durchgängig die bessere Sensitivität und Spezifität.
 }
 
-5. Es seien $y_1, \dots, y_n$ unabhängig Poisson verteilt zum Parameter $\lambda > 0$. Zeigen Sie, dass $\bar{y}$ der MLE für $\lambda$ ist.
+<!-- 5. Es seien $y_1, \dots, y_n$ unabhängig Poisson verteilt zum Parameter $\lambda > 0$. Zeigen Sie, dass $\bar{y}$ der MLE für $\lambda$ ist. -->
 
-\comment{
-Siehe \url{https://www.youtube.com/watch?v=Fs4HrXxSFTQ}.
-}
+<!-- \comment{ -->
+<!-- Siehe \url{https://www.youtube.com/watch?v=Fs4HrXxSFTQ}. -->
+<!-- } -->
 
-6. Zeigen Sie, dass sowohl der Erwartungswert als auch die Varianz der Poisson-Verteilung jeweils der Parameter $\lambda$ ist.
+<!-- 6. Zeigen Sie, dass sowohl der Erwartungswert als auch die Varianz der Poisson-Verteilung jeweils der Parameter $\lambda$ ist. -->
 
-\comment{
-Siehe \url{https://www.youtube.com/watch?v=RJE2LKBCqy4}.
-}
+<!-- \comment{ -->
+<!-- Siehe \url{https://www.youtube.com/watch?v=RJE2LKBCqy4}. -->
+<!-- } -->
 
-7. Für gegebene Beobachtungen $y$ und $X$ wollen wir $\lambda = \mathbb{E}(y\mid X)$ als Linearkombination der Regressoren $X$ modellieren. Wie stellen wir sicher, dass $\lambda > 0$ erfüllt bleibt? Wie hoch ist gemäß dieses Modells dann die Wahrscheinlichkeit, dass $y = k$ ist für $k = 0,1,2,\dots$ ?
+<!-- 7. Für gegebene Beobachtungen $y$ und $X$ wollen wir $\lambda = \mathbb{E}(y\mid X)$ als Linearkombination der Regressoren $X$ modellieren. Wie stellen wir sicher, dass $\lambda > 0$ erfüllt bleibt? Wie hoch ist gemäß dieses Modells dann die Wahrscheinlichkeit, dass $y = k$ ist für $k = 0,1,2,\dots$ ? -->
 
-\comment{
-Wir bilden die Linearkombination $w = \beta_0 + \beta_1 x_{1} + \dots + \beta_K x_{K}$ aus den Regressoren und modellieren $\lambda = \mathbb{E}(y\mid X) = \exp(w)$, siehe Vorlesungsfolien.
+<!-- \comment{ -->
+<!-- Wir bilden die Linearkombination $w = \beta_0 + \beta_1 x_{1} + \dots + \beta_K x_{K}$ aus den Regressoren und modellieren $\lambda = \mathbb{E}(y\mid X) = \exp(w)$, siehe Vorlesungsfolien. -->
 
-Für die Wahrscheinlichkeiten erhalten wir $$\mathbb{P}(y = k \mid X) = \frac{\exp(-\exp(w))\exp(w)^k}{k!}.$$
-}
+<!-- Für die Wahrscheinlichkeiten erhalten wir $$\mathbb{P}(y = k \mid X) = \frac{\exp(-\exp(w))\exp(w)^k}{k!}.$$ -->
+<!-- } -->
 
-8. Nutzen Sie den Datensatz `wooldridge::crime1` und modellieren Sie die Anzahl `narr86` an Inhaftierungen durch das Einkommen `inc86`. Wie können Sie den Einkommenskoeffizienten interpretieren?
+<!-- 8. Nutzen Sie den Datensatz `wooldridge::crime1` und modellieren Sie die Anzahl `narr86` an Inhaftierungen durch das Einkommen `inc86`. Wie können Sie den Einkommenskoeffizienten interpretieren? -->
 
-```{r, Aufgabe 8}
-glm(
-  formula = narr86 ~ inc86,
-  family = "poisson",
-  data = wooldridge::crime1
-)
-```
+<!-- ```{r, Aufgabe 8} -->
+<!-- glm( -->
+<!--   formula = narr86 ~ inc86, -->
+<!--   family = "poisson", -->
+<!--   data = wooldridge::crime1 -->
+<!-- ) -->
+<!-- ``` -->
 
-\comment{
-Der Koeffizient wird als $-0.01$ geschätzt. Die Variable `inc86` ist in der Einheit 100 Dollar angegeben (siehe Dokumentation). Das bedeutet, dass ein Anstieg im Gehalt um 100 Dollar den Erwartungswert an Inhaftierungen um $1\%$ senkt.
-}
+<!-- \comment{ -->
+<!-- Der Koeffizient wird als $-0.01$ geschätzt. Die Variable `inc86` ist in der Einheit 100 Dollar angegeben (siehe Dokumentation). Das bedeutet, dass ein Anstieg im Gehalt um 100 Dollar den Erwartungswert an Inhaftierungen um $1\%$ senkt. -->
+<!-- } -->

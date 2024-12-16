@@ -38,11 +38,3 @@ pROC::roc(
   add = TRUE
 )
 
-
-## ----Aufgabe 8---------------------------------------------------------------------------
-glm(
-  formula = narr86 ~ inc86,
-  family = "poisson",
-  data = wooldridge::crime1
-)
-
